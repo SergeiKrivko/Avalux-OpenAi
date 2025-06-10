@@ -1,5 +1,5 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <UsingTask TaskName="GenerateCodeTask"
+    <UsingTask TaskName="Avalux.OpenAi.Client.Tools.GenerateCodeTask"
                AssemblyFile="$(MSBuildThisFileDirectory)..\tasks\netstandard2.0\Avalux.OpenAi.Client.Tools.dll"/>
 
     <ItemGroup>
@@ -16,7 +16,7 @@
         </ItemGroup>
     </Target>
 
-    <Target Name="GenerateAvaluxOpenAiClientCodeOnChange" BeforeTargets="CoreCompile">
+    <Target Name="GenerateAvaluxOpenAiClientCodeOnCompile" BeforeTargets="CoreCompile">
         <GenerateCodeTask
                 ProtocolFiles="@(ProtocolFiles)"
                 OutputDirectory="$(IntermediateOutputPath)" />

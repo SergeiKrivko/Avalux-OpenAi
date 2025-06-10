@@ -2,7 +2,7 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <PackageId>Avalux.OpenAi.Client.Tools</PackageId>
-        <PackageVersion>0.0.4</PackageVersion>
+        <PackageVersion>0.0.8</PackageVersion>
 
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -15,7 +15,7 @@
 
     <!-- Включение .targets файла в пакет -->
     <ItemGroup>
-        <None Include="build\Avalix.OpenAi.Client.Tools.targets" Pack="true" PackagePath="build\" />
+        <None Include="build\Avalux.OpenAi.Client.Tools.targets" Pack="true" PackagePath="build\" />
     </ItemGroup>
 
     <!-- Включение самой задачи в правильную папку пакета -->
