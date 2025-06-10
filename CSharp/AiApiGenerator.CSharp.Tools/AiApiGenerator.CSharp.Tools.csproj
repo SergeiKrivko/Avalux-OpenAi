@@ -37,6 +37,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Core\AiApiGenerator.Protocol\AiApiGenerator.Protocol.csproj" PrivateAssets="all" />
+      <ProjectReference Include="..\..\Core\AiApiGenerator.Protocol\AiApiGenerator.Protocol.csproj" PrivateAssets="all" />
     </ItemGroup>
 </Project>
