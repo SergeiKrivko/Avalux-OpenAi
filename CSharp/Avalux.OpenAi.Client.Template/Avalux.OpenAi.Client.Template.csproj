@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <PackageType>Template</PackageType>
+        <PackageVersion>0.0.1</PackageVersion>
+        <PackageId>Avalux.OpenAi.Client.Template</PackageId>
+        <Title>Avalux.OpenAi client template</Title>
+        <Authors>SergeiKrivko</Authors>
+        <Description>Шаблон клиента для AvaluxOpenAi API.</Description>
+        <PackageTags>dotnet-new;templates</PackageTags>
+
+        <IncludeContentInPack>true</IncludeContentInPack>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <ContentTargetFolders>content</ContentTargetFolders>
+
+        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Folder Include="Templates\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="Templates\PluginTemplate\.template.config\template.json" />
+      <Content Include="Templates\PluginTemplate\MyPlugin.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="LICENSE.txt" Pack="true" PackagePath=""/>
+        <None Include="README.md" Pack="true" PackagePath=""/>
+    </ItemGroup>
+
+</Project>

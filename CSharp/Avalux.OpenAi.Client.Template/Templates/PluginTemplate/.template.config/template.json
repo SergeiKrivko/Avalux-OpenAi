@@ -1,0 +1,13 @@
+﻿{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "SergeiKrivko",
+  "classifications": ["Common/Library"],
+  "identity": "Avalux.OpenAi.Client",
+  "name": "Клиент Avalux.OpenAi",
+  "shortName": "avalux-openai-client",
+  "sourceName": "MyOpenAiClient",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  }
+}
