@@ -1,7 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
+        <PackageId>AiApiGenerator.CSharp.Tools</PackageId>
         <PackageVersion>1.1.0</PackageVersion>
+
+        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
 
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <IncludeBuildOutput>false</IncludeBuildOutput>
@@ -29,6 +33,11 @@
             </_PackageFiles>
         </ItemGroup>
     </Target>
+
+    <ItemGroup>
+        <None Include="LICENSE.txt" Pack="true" PackagePath=""/>
+        <None Include="README.md" Pack="true" PackagePath=""/>
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Humanizer.Core" Version="2.14.1" PrivateAssets="all" />
