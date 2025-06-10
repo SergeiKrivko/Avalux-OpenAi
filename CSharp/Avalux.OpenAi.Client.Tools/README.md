@@ -7,14 +7,14 @@
 ### Добавление библиотеки в проект:
 
 ```shell
-dotnet add package AiApiGenerator.CSharp.Tools
+dotnet add package Avalux.OpenAi.Client.Tools
 ```
 
 Или:
 
 ```csproj
 <ItemGroup>
-    <PackageReference Include="AiApiGenerator.CSharp.Tools" Version="..." PrivateAssets="all" />
+    <PackageReference Include="Avalux.OpenAi.Client.Tools" Version="..." PrivateAssets="all" />
 </ItemGroup>
 ```
 
