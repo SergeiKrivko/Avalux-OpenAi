@@ -44,7 +44,20 @@ public class CodeGenerator
                 new FromCodeImport("pydantic", "BaseModel"),
             ], $"class {model.Name.Pascalize()}(BaseModel):\n" +
                $"{string.Join('\n', model.Fields
-                   .Select(item => $"    {item.Key.Underscore()}: {ResolveType(item.Value)}"))}"
+                   .Select(item => $"    {item.Key.Underscore().ToLower()}: {ResolveType(item.Value)}"))}"
+        );
+    }
+
+    public CodeEntity GenerateRoute(ProtocolEndpoint endpoint)
+    {
+        return new CodeEntity([
+            ], $"@router.post(path=\"/{endpoint.Name}/init\", response_model=schemas.AgentResponseModel)\n" +
+               $"async def {endpoint.Name.Underscore().ToLower()}_init_handler(\n" +
+               $"    ai_agent: OpenAISvcDep,\n" +
+               $"    request: {ResolveType(endpoint.InputType)},\n" +
+               $") -> schemas.AgentResponseModel:\n" +
+               $"    result = await ai_agent.init_{endpoint.Name.Underscore().ToLower()}(request)\n" +
+               $"    return result"
         );
     }
 }
