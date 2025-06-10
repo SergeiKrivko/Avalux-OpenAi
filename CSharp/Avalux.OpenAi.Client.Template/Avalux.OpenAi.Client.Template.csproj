@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
 
         <PackageType>Template</PackageType>
-        <PackageVersion>0.0.1</PackageVersion>
+        <PackageVersion>0.0.2</PackageVersion>
         <PackageId>Avalux.OpenAi.Client.Template</PackageId>
         <Title>Avalux.OpenAi client template</Title>
         <Authors>SergeiKrivko</Authors>
@@ -26,8 +26,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="Templates\PluginTemplate\.template.config\template.json" />
-      <Content Include="Templates\PluginTemplate\MyPlugin.csproj" />
+      <Content Include="Templates\ProjectTemplate\.template.config\template.json" />
+      <Content Include="Templates\ProjectTemplate\MyOpenAiClient.csproj" />
     </ItemGroup>
 
     <ItemGroup>
