@@ -6,8 +6,8 @@ public class ApiClient : AiDocClientBase
     {
     }
 
-    protected override async Task<string> GetFile(IAiDocClient.GetFileRequest? param)
+    protected override Task<string> GetFile(IAiDocClient.GetFileRequest? param)
     {
-        throw new NotImplementedException();
+        return File.ReadAllTextAsync(param?.Path);
     }
 }
