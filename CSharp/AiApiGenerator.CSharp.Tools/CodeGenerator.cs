@@ -20,12 +20,6 @@ namespace AiApiGenerator.CSharp.Tools
         public string GenerateCode(string codeNamespace)
         {
             var compilationUnit = SyntaxFactory.CompilationUnit()
-                .WithLeadingTrivia(
-                    SyntaxFactory.Trivia(
-                        SyntaxFactory.NullableDirectiveTrivia(
-                            SyntaxFactory.Token(SyntaxKind.EnableKeyword), true)
-                    )
-                )
                 .AddUsings(
                     SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Net.Http.Json")),
                     SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Text.Json.Serialization")),
@@ -37,7 +31,7 @@ namespace AiApiGenerator.CSharp.Tools
 
             compilationUnit = compilationUnit.AddMembers(namespaceDeclaration);
 
-            return compilationUnit
+            return "#nullable enable\n\n" + compilationUnit
                 .NormalizeWhitespace()
                 .ToFullString();
         }
