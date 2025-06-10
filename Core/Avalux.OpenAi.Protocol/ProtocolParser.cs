@@ -67,8 +67,8 @@ namespace Avalux.OpenAi.Protocol
         ProtocolEndpointMode mode;
         switch (endpointSchema.Mode)
         {
-            case "string":
-                mode = ProtocolEndpointMode.String;
+            case "text":
+                mode = ProtocolEndpointMode.Text;
                 break;
             case "json":
                 mode = ProtocolEndpointMode.Json;
@@ -86,7 +86,7 @@ namespace Avalux.OpenAi.Protocol
             OutputType = protocol.ResolveType(endpointSchema.Output),
             Mode = mode
         };
-        if (result.Mode == ProtocolEndpointMode.String && !result.OutputType.IsString)
+        if (result.Mode == ProtocolEndpointMode.Text && !result.OutputType.IsString)
             throw new Exception("'string' mode requires a 'string' output type");
         if (result.Mode == ProtocolEndpointMode.Code && !result.OutputType.IsString)
             throw new Exception("'code' mode requires a 'string' output type");
