@@ -1,0 +1,43 @@
+﻿name: MyOpenAiClient
+endpoints:
+  GetForecast:
+    input: date
+    output: string
+    mode: text
+    
+  GetBestDay:
+    input: date
+    output: date
+  
+tools:
+  GetWeather:
+    input: DateRange
+    output: WeatherForecast
+    description: Получить прогноз погоды на определенный промежуток времени
+    
+schemas:
+  WeatherForecast:
+    - name: date
+      type: date
+      
+    - name: temperature
+      type: float
+      
+    - name: rain
+      type: bool
+      
+  DateRange:
+    - name: from
+      type: date
+      description: Дата начала промежутка
+      
+    - name: to
+      type: date
+      description: Дата конца промежутка
+      
+  SingleDay:
+    - name: date
+      type: date
+      
+    - name: day_of_week
+      type: string

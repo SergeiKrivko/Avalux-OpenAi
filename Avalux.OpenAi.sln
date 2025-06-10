@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalux.OpenAi.Client", "CSh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalux.OpenAi.Client.Template", "CSharp\Avalux.OpenAi.Client.Template\Avalux.OpenAi.Client.Template.csproj", "{BF49AFED-4AE2-4748-9554-55C074BECCA7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Weather", "Weather\Weather.csproj", "{5997F609-3283-44F8-AE9D-6319695D5A8C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,5 +53,9 @@ Global
 		{BF49AFED-4AE2-4748-9554-55C074BECCA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF49AFED-4AE2-4748-9554-55C074BECCA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF49AFED-4AE2-4748-9554-55C074BECCA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5997F609-3283-44F8-AE9D-6319695D5A8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5997F609-3283-44F8-AE9D-6319695D5A8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5997F609-3283-44F8-AE9D-6319695D5A8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5997F609-3283-44F8-AE9D-6319695D5A8C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
