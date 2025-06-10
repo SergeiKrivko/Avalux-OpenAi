@@ -26,6 +26,57 @@ dotnet add package AiApiGenerator.CSharp.Tools
 </ItemGroup>
 ```
 
+### Протокол
+
+Для файлов протокола используется формат YAML:
+```yaml
+name: AiDoc
+
+endpoints:
+  features:
+    input: FeaturesRequest
+    output: Feature[]
+    mode: json
+
+tools:
+  get_file:
+    input: GetFileRequest
+    output: string
+    description: Загружает файл исходного кода по его относительному пути
+
+schemas:
+  ProjectStructure:
+    - name: name
+      type: string
+    
+    - name: files
+      type: string[]
+      example: |
+        [
+          "main.py", 
+          "client.py"
+        ]
+
+  ProjectChanges:
+    - name: files
+      type: string[]
+
+  FeaturesRequest:
+    - name: structure
+      type: ProjectStructure
+
+  Feature:
+    - name: name
+      type: string
+
+  GetFileRequest:
+    - name: path
+      type: string
+      description: Путь к файлу от корневой папки
+
+        
+```
+
 ### Генерация кода
 
 Будут автоматически созданы интерфейс `I<Название протокола>Client` 
