@@ -4,15 +4,15 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
-using AiApiGenerator.Protocol.Models;
+using Avalux.OpenAi.Protocol.Models;
 
-namespace AiApiGenerator.CSharp.Tools
+namespace Avalux.OpenAi.Client.Tools
 {
     public class CodeGenerator
     {
-        private readonly Protocol.Models.Protocol _protocol;
+        private readonly Avalux.OpenAi.Protocol.Models.Protocol _protocol;
 
-        public CodeGenerator(Protocol.Models.Protocol protocol)
+        public CodeGenerator(Avalux.OpenAi.Protocol.Models.Protocol protocol)
         {
             _protocol = protocol;
         }

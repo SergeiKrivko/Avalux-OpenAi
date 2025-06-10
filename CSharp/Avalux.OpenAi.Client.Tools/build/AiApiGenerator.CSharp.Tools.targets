@@ -1,6 +1,6 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <UsingTask TaskName="GenerateCodeTask"
-               AssemblyFile="$(MSBuildThisFileDirectory)..\tasks\netstandard2.0\AiApiGenerator.CSharp.Tools.dll"/>
+               AssemblyFile="$(MSBuildThisFileDirectory)..\tasks\netstandard2.0\Avalux.OpenAi.Client.Tools.dll"/>
 
     <ItemGroup>
         <ProtocolFiles Include="**\*.yml" />

@@ -1,4 +1,4 @@
-﻿# AiApiGenerator.CSharp.Tools
+﻿# Avalux.OpenAi.Client.Tools
 
 Инструмент для генерации клиентов на C#.
 
@@ -76,6 +76,20 @@ schemas:
 
         
 ```
+
+Протокол поддерживает следующие типы:
+- `int`
+- `float`
+- `bool`
+- `string`
+- `uuid`
+- `datetime`
+- `date`
+- `time`
+- `duration`
+- Массивы, например `string[]` или `datetime?[]`
+- Nullable-типы, например `int?` или `float[]?`
+- Пользовательские типы. Определяются в блоке "schemas"
 
 ### Генерация кода
 
