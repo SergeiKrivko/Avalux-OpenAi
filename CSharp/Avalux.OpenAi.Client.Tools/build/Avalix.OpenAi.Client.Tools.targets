@@ -6,7 +6,7 @@
         <ProtocolFiles Include="**\*.yml" />
     </ItemGroup>
 
-    <Target Name="GenerateAiApiClientCodeOnChange" BeforeTargets="SourceFilesProjectOutputGroup">
+    <Target Name="GenerateAvaluxOpenAiClientCodeOnChange" BeforeTargets="SourceFilesProjectOutputGroup">
         <GenerateCodeTask
                 ProtocolFiles="@(ProtocolFiles)"
                 OutputDirectory="$(IntermediateOutputPath)" />
@@ -16,7 +16,7 @@
         </ItemGroup>
     </Target>
 
-    <Target Name="GenerateAiApiClientCodeOnBuild" BeforeTargets="CoreCompile">
+    <Target Name="GenerateAvaluxOpenAiClientCodeOnChange" BeforeTargets="CoreCompile">
         <GenerateCodeTask
                 ProtocolFiles="@(ProtocolFiles)"
                 OutputDirectory="$(IntermediateOutputPath)" />
