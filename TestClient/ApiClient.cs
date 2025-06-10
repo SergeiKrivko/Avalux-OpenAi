@@ -1,4 +1,6 @@
-﻿namespace TestClient;
+﻿using AiDoc.Client;
+
+namespace TestClient;
 
 public class ApiClient : AiDocClientBase
 {

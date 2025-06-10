@@ -12,7 +12,6 @@ namespace AiApiGenerator.CSharp.Tools
         [Required] public ITaskItem[] ProtocolFiles { get; set; }
 
         [Required] public string OutputDirectory { get; set; }
-        // [Required] public string SettingNamespaceName { get; set; }
 
         public override bool Execute()
         {
@@ -24,9 +23,10 @@ namespace AiApiGenerator.CSharp.Tools
                     Log.LogMessage(MessageImportance.Normal, $"Генерация кода для файла протокола {file}");
 
                     var protocolParser = new ProtocolParser();
-                    var generator = new CodeGenerator(protocolParser.ParseFile(file.ItemSpec));
+                    var protocol = protocolParser.ParseFile(file.ItemSpec);
+                    var generator = new CodeGenerator(protocol);
 
-                    var generatedCode = generator.GenerateCode("TestClient");
+                    var generatedCode = generator.GenerateCode(protocol.Name.Pascalize() + ".Client");
 
                     var outputPath = Path.Combine(
                         OutputDirectory,
@@ -34,6 +34,7 @@ namespace AiApiGenerator.CSharp.Tools
 
                     File.WriteAllText(outputPath, generatedCode);
                 }
+
                 return true;
             }
             catch (Exception e)

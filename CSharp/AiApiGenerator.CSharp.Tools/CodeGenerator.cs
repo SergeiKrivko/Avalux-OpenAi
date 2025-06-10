@@ -75,7 +75,11 @@ namespace AiApiGenerator.CSharp.Tools
                     return SyntaxFactory.NullableType(ResolveType(nullableType.InnerType));
 
                 case ProtocolArrayType arrayType:
-                    return SyntaxFactory.ArrayType(ResolveType(arrayType.ArrayType));
+                    return SyntaxFactory.ArrayType(ResolveType(arrayType.ArrayType)).WithRankSpecifiers(
+                        SyntaxFactory.SingletonList(
+                            SyntaxFactory.ArrayRankSpecifier(
+                                SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(
+                                    SyntaxFactory.OmittedArraySizeExpression()))));
 
                 default:
                     throw new InvalidOperationException($"Unknown protocol type: {protocolType}");
@@ -125,16 +129,16 @@ namespace AiApiGenerator.CSharp.Tools
                     .AddMembers(
                         SyntaxFactory.ParseMemberDeclaration(
                             $"protected {_protocol.Name.Pascalize()}ClientBase(Uri apiUri)\n" +
-                            "{{\n" +
+                            "{\n" +
                             "    _httpClient = new HttpClient { BaseAddress = apiUri };\n" +
-                            $"    {string.Join("\n", _protocol.Tools.Select(tool => $"AddFunction<{ResolveType(tool.InputType).ToFullString()}, " + $"{ResolveType(tool.OutputType).ToFullString()}>(\"{tool.Name}\", {tool.Name.Pascalize()})"))};" +
-                            "}}") ?? throw new Exception("Internal error"),
+                            $"    {string.Join("\n", _protocol.Tools.Select(tool => $"AddFunction<{ResolveType(tool.InputType).ToFullString()}, " + $"{ResolveType(tool.OutputType).ToFullString()}>(\"{tool.Name}\", {tool.Name.Pascalize()});"))}\n" +
+                            "}") ?? throw new Exception("Internal error"),
                         SyntaxFactory.ParseMemberDeclaration(
                             $"protected {_protocol.Name.Pascalize()}ClientBase(HttpClient httpClient)\n" +
-                            "{{\n" +
+                            "{\n" +
                             "    _httpClient = httpClient;\n" +
-                            $"    {string.Join("\n", _protocol.Tools.Select(tool => $"AddFunction<{ResolveType(tool.InputType).ToFullString()}, " + $"{ResolveType(tool.OutputType).ToFullString()}>(\"{tool.Name}\", {tool.Name.Pascalize()})"))};" +
-                            "}}") ?? throw new Exception("Internal error"),
+                            $"    {string.Join("\n", _protocol.Tools.Select(tool => $"AddFunction<{ResolveType(tool.InputType).ToFullString()}, " + $"{ResolveType(tool.OutputType).ToFullString()}>(\"{tool.Name}\", {tool.Name.Pascalize()});"))}\n" +
+                            "}") ?? throw new Exception("Internal error"),
                         SyntaxFactory.FieldDeclaration(
                                 SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("HttpClient"))
                                     .WithVariables(SyntaxFactory.SeparatedList(new[]
