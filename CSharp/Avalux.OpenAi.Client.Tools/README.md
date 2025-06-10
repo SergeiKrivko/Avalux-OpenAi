@@ -1,4 +1,4 @@
-﻿# AiApiGenerator.CSharp.Tools
+﻿# Avalux.OpenAi.Client.Tools
 
 Инструмент для генерации клиентов на C#.
 
@@ -7,14 +7,14 @@
 ### Добавление библиотеки в проект:
 
 ```shell
-dotnet add package AiApiGenerator.CSharp.Tools
+dotnet add package Avalux.OpenAi.Client.Tools
 ```
 
 Или:
 
 ```csproj
 <ItemGroup>
-    <PackageReference Include="AiApiGenerator.CSharp.Tools" Version="..." PrivateAssets="all" />
+    <PackageReference Include="Avalux.OpenAi.Client.Tools" Version="..." PrivateAssets="all" />
 </ItemGroup>
 ```
 
@@ -76,6 +76,20 @@ schemas:
 
         
 ```
+
+Протокол поддерживает следующие типы:
+- `int`
+- `float`
+- `bool`
+- `string`
+- `uuid`
+- `datetime`
+- `date`
+- `time`
+- `duration`
+- Массивы, например `string[]` или `datetime?[]`
+- Nullable-типы, например `int?` или `float[]?`
+- Пользовательские типы. Определяются в блоке "schemas"
 
 ### Генерация кода
 

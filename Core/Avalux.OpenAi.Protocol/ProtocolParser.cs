@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
-using AiApiGenerator.Protocol.Models;
-using AiApiGenerator.Protocol.Schemas;
+using Avalux.OpenAi.Protocol.Models;
+using Avalux.OpenAi.Protocol.Schemas;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace AiApiGenerator.Protocol
+namespace Avalux.OpenAi.Protocol
 {
     public class ProtocolParser
 {

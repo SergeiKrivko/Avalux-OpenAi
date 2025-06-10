@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AiApiGenerator.Protocol.Models
+namespace Avalux.OpenAi.Protocol.Models
 {
     public class Protocol
     {

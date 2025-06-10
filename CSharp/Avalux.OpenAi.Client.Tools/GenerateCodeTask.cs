@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
-using AiApiGenerator.Protocol;
+using Avalux.OpenAi.Protocol;
 using Humanizer;
 using Microsoft.Build.Framework;
 using Task = Microsoft.Build.Utilities.Task;
 
-namespace AiApiGenerator.CSharp.Tools
+namespace Avalux.OpenAi.Client.Tools
 {
     public class GenerateCodeTask : Task
     {

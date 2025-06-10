@@ -1,4 +1,4 @@
-﻿namespace AiApiGenerator.Protocol.Schemas
+﻿namespace Avalux.OpenAi.Protocol.Schemas
 {
     public class ApiSchemaFieldSchema
     {

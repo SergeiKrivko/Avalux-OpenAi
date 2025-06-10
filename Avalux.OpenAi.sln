@@ -7,13 +7,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestProtocols", "TestProtoc
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{EFB80F86-0BF7-4772-93C6-C3D2834791DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AiApiGenerator.Protocol", "Core\AiApiGenerator.Protocol\AiApiGenerator.Protocol.csproj", "{BAD4A384-EE41-486F-A791-0EB7388DACAB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalux.OpenAi.Protocol", "Core\Avalux.OpenAi.Protocol\Avalux.OpenAi.Protocol.csproj", "{BAD4A384-EE41-486F-A791-0EB7388DACAB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CSharp", "CSharp", "{1E151431-483D-43E8-8F77-AA66B147BB73}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClient", "TestClient\TestClient.csproj", "{97C05890-F5C2-4D4B-9A75-793E0AAD5899}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AiApiGenerator.CSharp.Tools", "CSharp\AiApiGenerator.CSharp.Tools\AiApiGenerator.CSharp.Tools.csproj", "{A65181A9-6053-44CD-9156-6DE63A64FF65}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalux.OpenAi.Client.Tools", "CSharp\Avalux.OpenAi.Client.Tools\Avalux.OpenAi.Client.Tools.csproj", "{A65181A9-6053-44CD-9156-6DE63A64FF65}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

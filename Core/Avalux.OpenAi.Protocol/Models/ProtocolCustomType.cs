@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AiApiGenerator.Protocol.Schemas;
+using Avalux.OpenAi.Protocol.Schemas;
 
-namespace AiApiGenerator.Protocol.Models
+namespace Avalux.OpenAi.Protocol.Models
 {
     public class ProtocolCustomType : IProtocolType
     {

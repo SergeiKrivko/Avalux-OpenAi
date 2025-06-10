@@ -1,4 +1,4 @@
-﻿namespace AiApiGenerator.Protocol.Models
+﻿namespace Avalux.OpenAi.Protocol.Models
 {
     public class ProtocolEndpoint
     {

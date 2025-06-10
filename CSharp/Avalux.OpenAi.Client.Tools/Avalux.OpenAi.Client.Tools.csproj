@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <PackageId>AiApiGenerator.CSharp.Tools</PackageId>
-        <PackageVersion>1.1.6</PackageVersion>
+        <PackageId>Avalux.OpenAi.Client.Tools</PackageId>
+        <PackageVersion>0.0.1</PackageVersion>
 
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -46,6 +46,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Core\AiApiGenerator.Protocol\AiApiGenerator.Protocol.csproj" PrivateAssets="all" />
+      <ProjectReference Include="..\..\Core\Avalux.OpenAi.Protocol\Avalux.OpenAi.Protocol.csproj" PrivateAssets="all" />
     </ItemGroup>
 </Project>

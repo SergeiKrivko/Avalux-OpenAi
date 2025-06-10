@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace AiApiGenerator.Protocol.Schemas
+namespace Avalux.OpenAi.Protocol.Schemas
 {
     public class ApiSchema
     {
