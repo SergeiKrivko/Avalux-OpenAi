@@ -13,8 +13,6 @@ namespace AiApiGenerator.CSharp.Tools
 
         [Required] public string OutputDirectory { get; set; }
 
-        public string SettingNamespaceName { get; set; }
-
         public override bool Execute()
         {
             try
@@ -28,9 +26,7 @@ namespace AiApiGenerator.CSharp.Tools
                     var protocol = protocolParser.ParseFile(file.ItemSpec);
                     var generator = new CodeGenerator(protocol);
 
-                    var generatedCode = generator.GenerateCode(string.IsNullOrEmpty(SettingNamespaceName)
-                        ? protocol.Name.Pascalize() + ".Client"
-                        : SettingNamespaceName + $".{protocol.Name.Pascalize()}.Client");
+                    var generatedCode = generator.GenerateCode(protocol.Name.Pascalize() + ".Client");
 
                     var outputPath = Path.Combine(
                         OutputDirectory,
