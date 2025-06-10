@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <PackageVersion>1.1.0</PackageVersion>
+
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <DevelopmentDependency>true</DevelopmentDependency>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    </PropertyGroup>
+
+    <!-- Включение .targets файла в пакет -->
+    <ItemGroup>
+        <None Include="build\AiApiGenerator.CSharp.Tools.targets" Pack="true" PackagePath="build\" />
+    </ItemGroup>
+
+    <!-- Включение самой задачи в правильную папку пакета -->
+    <ItemGroup>
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="tasks\$(TargetFramework)\" />
+    </ItemGroup>
+
+    <!-- Копирование зависимостей в пакет -->
+    <Target Name="IncludeDependencies" BeforeTargets="_GetPackageFiles">
+        <ItemGroup>
+            <!-- Включаем все зависимости в папку tasks -->
+            <_PackageFiles Include="$(OutputPath)\*.dll;(OutputPath)\*.dll"
+                           Exclude="$(OutputPath)\$(AssemblyName).dll;$(OutputPath)\Microsoft.Build*.dll">
+                <PackagePath>tasks\$(TargetFramework)\</PackagePath>
+            </_PackageFiles>
+        </ItemGroup>
+    </Target>
+
+    <ItemGroup>
+        <PackageReference Include="Humanizer.Core" Version="2.14.1" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.14.8" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" PrivateAssets="all" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Core\AiApiGenerator.Protocol\AiApiGenerator.Protocol.csproj" PrivateAssets="all" />
+    </ItemGroup>
+</Project>

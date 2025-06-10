@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestProtocols", "TestProtocols", "{108F8D70-01E6-45D7-8D83-BF80C7BB5CFA}"
+	ProjectSection(SolutionItems) = preProject
+		TestProtocols\AiDoc.yml = TestProtocols\AiDoc.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{EFB80F86-0BF7-4772-93C6-C3D2834791DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AiApiGenerator.Protocol", "Core\AiApiGenerator.Protocol\AiApiGenerator.Protocol.csproj", "{BAD4A384-EE41-486F-A791-0EB7388DACAB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CSharp", "CSharp", "{1E151431-483D-43E8-8F77-AA66B147BB73}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AiApiGenerator.CSharp.Tools", "AiApiGenerator.CSharp.Tools\AiApiGenerator.CSharp.Tools.csproj", "{6C43F1D6-49DC-4E3B-AA93-BE4D94EBFEEB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClient", "TestClient\TestClient.csproj", "{97C05890-F5C2-4D4B-9A75-793E0AAD5899}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BAD4A384-EE41-486F-A791-0EB7388DACAB} = {EFB80F86-0BF7-4772-93C6-C3D2834791DD}
+		{6C43F1D6-49DC-4E3B-AA93-BE4D94EBFEEB} = {1E151431-483D-43E8-8F77-AA66B147BB73}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BAD4A384-EE41-486F-A791-0EB7388DACAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAD4A384-EE41-486F-A791-0EB7388DACAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAD4A384-EE41-486F-A791-0EB7388DACAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAD4A384-EE41-486F-A791-0EB7388DACAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C43F1D6-49DC-4E3B-AA93-BE4D94EBFEEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C43F1D6-49DC-4E3B-AA93-BE4D94EBFEEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C43F1D6-49DC-4E3B-AA93-BE4D94EBFEEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C43F1D6-49DC-4E3B-AA93-BE4D94EBFEEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97C05890-F5C2-4D4B-9A75-793E0AAD5899}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97C05890-F5C2-4D4B-9A75-793E0AAD5899}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97C05890-F5C2-4D4B-9A75-793E0AAD5899}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97C05890-F5C2-4D4B-9A75-793E0AAD5899}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
