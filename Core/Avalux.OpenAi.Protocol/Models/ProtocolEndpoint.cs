@@ -10,7 +10,7 @@
 
     public enum ProtocolEndpointMode
     {
-        String,
+        Text,
         Json,
         Code,
     }
