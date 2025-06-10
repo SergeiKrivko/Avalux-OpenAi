@@ -36,6 +36,9 @@ schemas:
   Feature:
     - name: name
       type: string
+      
+    - name: children
+      type: Feature[]
 
   GetFileRequest:
     - name: path

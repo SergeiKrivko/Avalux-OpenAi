@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClient", "TestClient\Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AiApiGenerator.CSharp.Tools", "CSharp\AiApiGenerator.CSharp.Tools\AiApiGenerator.CSharp.Tools.csproj", "{A65181A9-6053-44CD-9156-6DE63A64FF65}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Python", "Python", "{B0534338-A82F-40EB-B8C3-F5C0152189CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AiApiGenerator.Python", "Python\AiApiGenerator.Python\AiApiGenerator.Python.csproj", "{6C00F94F-69E3-49AF-9EFE-6341608E764C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +27,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{BAD4A384-EE41-486F-A791-0EB7388DACAB} = {EFB80F86-0BF7-4772-93C6-C3D2834791DD}
 		{A65181A9-6053-44CD-9156-6DE63A64FF65} = {1E151431-483D-43E8-8F77-AA66B147BB73}
+		{6C00F94F-69E3-49AF-9EFE-6341608E764C} = {B0534338-A82F-40EB-B8C3-F5C0152189CC}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{BAD4A384-EE41-486F-A791-0EB7388DACAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -37,5 +42,9 @@ Global
 		{A65181A9-6053-44CD-9156-6DE63A64FF65}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A65181A9-6053-44CD-9156-6DE63A64FF65}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A65181A9-6053-44CD-9156-6DE63A64FF65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C00F94F-69E3-49AF-9EFE-6341608E764C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C00F94F-69E3-49AF-9EFE-6341608E764C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C00F94F-69E3-49AF-9EFE-6341608E764C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C00F94F-69E3-49AF-9EFE-6341608E764C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
