@@ -305,7 +305,7 @@ namespace Avalux.OpenAi.Client.Tools
             Directory.CreateDirectory(Path.Combine(projectPath, "Prompts"));
             foreach (var endpoint in _protocol.Endpoints)
             {
-                var file = Path.Combine(projectPath, endpoint.Name.Pascalize() + ".prompt.txt");
+                var file = Path.Combine(projectPath, "Prompts", endpoint.Name.Pascalize() + ".prompt.txt");
                 if (!File.Exists(file))
                     File.WriteAllText(file, string.Empty);
             }
