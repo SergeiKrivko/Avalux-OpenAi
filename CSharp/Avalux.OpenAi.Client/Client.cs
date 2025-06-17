@@ -216,4 +216,9 @@ public class Client
         var content = File.ReadAllText(filePath);
         _tools = JsonSerializer.Deserialize<AiTool[]>(content) ?? throw new Exception("Failed to deserialize tools");
     }
+
+    public void ReadToolFromString(string tools)
+    {
+        _tools = JsonSerializer.Deserialize<AiTool[]>(tools) ?? throw new Exception("Failed to deserialize tools");
+    }
 }
