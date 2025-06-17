@@ -25,6 +25,7 @@ namespace Avalux.OpenAi.Client.Tools
                     SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Net.Http.Json")),
                     SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Text.Json.Serialization")),
                     SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Text.Json")),
+                    SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Reflection")),
                     SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("Avalux.OpenAi.Client"))
                 );
 
@@ -134,12 +135,14 @@ namespace Avalux.OpenAi.Client.Tools
                             "{\n" +
                             "    _client = new Avalux.OpenAi.Client.Client(new HttpClient { BaseAddress = apiUri });\n" +
                             $"    {string.Join("\n", _protocol.Tools.Select(tool => $"_client.AddFunction<{tool.Name.Pascalize()}Request, " + $"{ResolveType(tool.ResultType).ToFullString()}>(\"{tool.Name}\", _{tool.Name.Pascalize()});"))}\n" +
+                            $"    _client.ReadToolFromFile(Path.Join(Assembly.GetExecutingAssembly().Location, \"{_protocol.Name.Pascalize()}.generated.json\"));\n" +
                             "}") ?? throw new Exception("Internal error"),
                         SyntaxFactory.ParseMemberDeclaration(
                             $"protected {_protocol.Name.Pascalize()}ClientBase(HttpClient httpClient)\n" +
                             "{\n" +
                             "    _client = new Avalux.OpenAi.Client.Client(httpClient);\n" +
                             $"    {string.Join("\n", _protocol.Tools.Select(tool => $"_client.AddFunction<{tool.Name.Pascalize()}Request, " + $"{ResolveType(tool.ResultType).ToFullString()}>(\"{tool.Name}\", _{tool.Name.Pascalize()});"))}\n" +
+                            $"    _client.ReadToolFromFile(Path.Join(Assembly.GetExecutingAssembly().Location, \"{_protocol.Name.Pascalize()}.generated.json\"));\n" +
                             "}") ?? throw new Exception("Internal error"),
                         SyntaxFactory.FieldDeclaration(
                                 SyntaxFactory
@@ -231,7 +234,8 @@ namespace Avalux.OpenAi.Client.Tools
             var typeParam = endpoint.Mode == ProtocolEndpointMode.Json
                 ? $"<{ResolveType(endpoint.InputType).ToFullString()}, {ResolveType(endpoint.OutputType).ToFullString()}>"
                 : $"<{ResolveType(endpoint.InputType).ToFullString()}>";
-            return $"await _client.Send{endpoint.Mode}RequestAsync{typeParam}(param)";
+            return
+                $"await _client.Send{endpoint.Mode}RequestAsync{typeParam}(await File.ReadAllTextAsync(Path.Join(Assembly.GetExecutingAssembly().Location, \"Prompts\", \"{endpoint.Name.Pascalize()}.prompt.txt\")), param)";
         }
 
         private ClassDeclarationSyntax GenerateModelClass(ProtocolCustomType customType)
