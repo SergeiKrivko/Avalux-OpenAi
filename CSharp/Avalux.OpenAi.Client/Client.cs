@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Avalux.OpenAi.Client.Models;
 
 namespace Avalux.OpenAi.Client;
@@ -7,6 +8,8 @@ namespace Avalux.OpenAi.Client;
 public class Client
 {
     private readonly HttpClient _httpClient;
+
+    private AiTool[] _tools = [];
 
     public Client(HttpClient httpClient)
     {
@@ -27,27 +30,27 @@ public class Client
 
     private readonly List<Function> _functions = [];
 
-    public async Task<string?> SendTextRequestAsync<TIn>(TIn request)
+    public async Task<string?> SendTextRequestAsync<TIn>(string prompt, TIn request)
     {
-        var resp = await SendRequestAsync(request);
+        var resp = await SendRequestAsync(prompt, request);
         return resp == null ? null : ProcessTextResult(resp);
     }
 
-    public async Task<TOut?> SendJsonRequestAsync<TIn, TOut>(TIn request)
+    public async Task<TOut?> SendJsonRequestAsync<TIn, TOut>(string prompt, TIn request)
     {
-        var resp = await SendRequestAsync(request);
+        var resp = await SendRequestAsync(prompt, request);
         return resp == null ? default : ProcessJsonResult<TOut>(resp);
     }
 
-    public async Task<string?> SendCodeRequestAsync<TIn>(TIn request)
+    public async Task<string?> SendCodeRequestAsync<TIn>(string prompt, TIn request)
     {
-        var resp = await SendRequestAsync(request);
+        var resp = await SendRequestAsync(prompt, request);
         return resp == null ? null : ProcessCodeResult(resp);
     }
 
-    private async Task<string?> SendRequestAsync<TIn>(TIn request)
+    private async Task<string?> SendRequestAsync<TIn>(string prompt, TIn request)
     {
-        var resp = await SendInitAsync(request);
+        var resp = await SendInitAsync(prompt, request);
         for (int i = 0; i < MaxToolCalls; i++)
         {
             var retry = 0;
@@ -128,9 +131,28 @@ public class Client
         return result;
     }
 
-    private async Task<AiResponseModel> SendInitAsync<TIn>(TIn request)
+    private async Task<AiResponseModel> SendInitAsync<TIn>(string prompt, TIn request)
     {
-        var content = JsonContent.Create(request);
+        var content = JsonContent.Create(new AiRequestModel
+        {
+            Messages =
+            [
+                new AiMessage
+                {
+                    Role = "system",
+                    Content = prompt,
+                },
+                new AiMessage
+                {
+                    Role = "user",
+                    Content = JsonSerializer.Serialize(request)
+                },
+            ],
+            Tools = _tools
+        }, options: new JsonSerializerOptions
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        });
         var resp = await _httpClient.PostAsync(Url, content);
         if (!resp.IsSuccessStatusCode)
         {
@@ -181,5 +203,17 @@ public class Client
             var param = JsonSerializer.Deserialize<TIn>(data);
             return await func(param);
         }));
+    }
+
+    public async Task ReadToolFromFileAsync(string filePath)
+    {
+        var content = await File.ReadAllTextAsync(filePath);
+        _tools = JsonSerializer.Deserialize<AiTool[]>(content) ?? throw new Exception("Failed to deserialize tools");
+    }
+
+    public void ReadToolFromFile(string filePath)
+    {
+        var content = File.ReadAllText(filePath);
+        _tools = JsonSerializer.Deserialize<AiTool[]>(content) ?? throw new Exception("Failed to deserialize tools");
     }
 }
