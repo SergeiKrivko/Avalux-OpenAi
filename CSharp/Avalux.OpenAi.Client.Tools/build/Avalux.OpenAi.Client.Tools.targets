@@ -28,10 +28,18 @@
             <Compile Include="$(IntermediateOutputPath)*.generated.cs"/>
         </ItemGroup>
     </Target>
-    
-    <Target Name="CopyPromptFiles" AfterTargets="Build">
+
+    <Target Name="IncludeAdditionalFiles" AfterTargets="Build">
         <ItemGroup>
-            <None Include="Prompts/*.prompt.txt" CopyToOutputDirectory="PreserveNewest"/>
+            <None Include="$(MSBuildProjectDirectory)\Prompts\*.prompt.txt"
+                  CopyToOutputDirectory="PreserveNewest"
+                  CopyToPublishDirectory="PreserveNewest"/>
         </ItemGroup>
+        <ItemGroup>
+            <FilesToCopy Include="$(IntermediateOutputPath)\*.generated.json"/>
+        </ItemGroup>
+        <Copy SourceFiles="@(FilesToCopy)"
+              DestinationFolder="$(OutputPath)"
+              SkipUnchangedFiles="true"/>
     </Target>
 </Project>

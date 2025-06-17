@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 
 namespace Avalux.OpenAi.Protocol.Models
 {
@@ -26,6 +27,18 @@ namespace Avalux.OpenAi.Protocol.Models
             if (CustomTypes.TryGetValue(type, out var result))
                 return result;
             throw new Exception($"Unknown type: {type}");
+        }
+
+        public string GenerateToolsJson()
+        {
+            var res = Tools.Select(tool => new ApiTool
+                {
+                    Name = tool.Name,
+                    Description = tool.Description,
+                    Parameters = tool.Parameters.Select(p => p.ToApiParameter()).ToArray()
+                }
+            ).ToArray();
+            return JsonSerializer.Serialize(res);
         }
     }
 }

@@ -8,13 +8,11 @@
 
     <ItemGroup>
         <ProtocolFiles Include="Protocol.yml"/>
-        <None Include="Prompts/*.prompt.txt" CopyToOutputDirectory="PreserveNewest"/>
     </ItemGroup>
-
-
+    
     <ItemGroup>
         <PackageReference Include="Avalux.OpenAi.Client" Version="0.0.2"/>
-        <PackageReference Include="Avalux.OpenAi.Client.Tools" Version="0.0.4"/>
+        <PackageReference Include="Avalux.OpenAi.Client.Tools" Version="0.1.7"/>
     </ItemGroup>
 
 </Project>

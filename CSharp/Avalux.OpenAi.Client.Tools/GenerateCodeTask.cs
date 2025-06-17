@@ -32,10 +32,16 @@ namespace Avalux.OpenAi.Client.Tools
 
                     var outputPath = Path.Combine(
                         OutputDirectory,
-                        Path.GetFileNameWithoutExtension(file.ItemSpec.Pascalize()) + "Client.generated.cs");
+                        Path.GetFileNameWithoutExtension(file.ItemSpec.Pascalize()) + $"{protocol.Name.Pascalize()}.generated.cs");
 
                     File.WriteAllText(outputPath, generatedCode);
-                    
+
+                    var toolsJsonPath = Path.Combine(
+                        OutputDirectory,
+                        Path.GetFileNameWithoutExtension(file.ItemSpec.Pascalize()) + $"{protocol.Name.Pascalize()}Tools.generated.json");
+
+                    File.WriteAllText(toolsJsonPath, protocol.GenerateToolsJson());
+
                     generator.GeneratePromptFiles(ProjectDirectory);
                 }
 

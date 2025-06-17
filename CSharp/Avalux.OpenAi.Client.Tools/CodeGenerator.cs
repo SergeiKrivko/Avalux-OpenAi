@@ -133,16 +133,17 @@ namespace Avalux.OpenAi.Client.Tools
                             $"protected {_protocol.Name.Pascalize()}ClientBase(Uri apiUri)\n" +
                             "{\n" +
                             "    _client = new Avalux.OpenAi.Client.Client(new HttpClient { BaseAddress = apiUri });\n" +
-                            $"    {string.Join("\n", _protocol.Tools.Select(tool => $"_client.AddFunction<{ResolveType(tool.InputType).ToFullString()}, " + $"{ResolveType(tool.OutputType).ToFullString()}>(\"{tool.Name}\", {tool.Name.Pascalize()});"))}\n" +
+                            $"    {string.Join("\n", _protocol.Tools.Select(tool => $"_client.AddFunction<{tool.Name.Pascalize()}Request, " + $"{ResolveType(tool.ResultType).ToFullString()}>(\"{tool.Name}\", _{tool.Name.Pascalize()});"))}\n" +
                             "}") ?? throw new Exception("Internal error"),
                         SyntaxFactory.ParseMemberDeclaration(
                             $"protected {_protocol.Name.Pascalize()}ClientBase(HttpClient httpClient)\n" +
                             "{\n" +
                             "    _client = new Avalux.OpenAi.Client.Client(httpClient);\n" +
-                            $"    {string.Join("\n", _protocol.Tools.Select(tool => $"_client.AddFunction<{ResolveType(tool.InputType).ToFullString()}, " + $"{ResolveType(tool.OutputType).ToFullString()}>(\"{tool.Name}\", {tool.Name.Pascalize()});"))}\n" +
+                            $"    {string.Join("\n", _protocol.Tools.Select(tool => $"_client.AddFunction<{tool.Name.Pascalize()}Request, " + $"{ResolveType(tool.ResultType).ToFullString()}>(\"{tool.Name}\", _{tool.Name.Pascalize()});"))}\n" +
                             "}") ?? throw new Exception("Internal error"),
                         SyntaxFactory.FieldDeclaration(
-                                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("Avalux.OpenAi.Client.Client"))
+                                SyntaxFactory
+                                    .VariableDeclaration(SyntaxFactory.ParseTypeName("Avalux.OpenAi.Client.Client"))
                                     .WithVariables(SyntaxFactory.SeparatedList(new[]
                                         { SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier("_client")) })))
                             .AddModifiers(
@@ -173,20 +174,48 @@ namespace Avalux.OpenAi.Client.Tools
                         .Cast<MemberDeclarationSyntax>()
                         .ToArray()
                     )
+                    .AddMembers(_protocol.Tools
+                        .Select(GenerateToolRequestModelClass)
+                        .Cast<MemberDeclarationSyntax>()
+                        .ToArray())
                     .AddMembers(
                         _protocol.Tools
                             .Select(tool =>
                                 SyntaxFactory.MethodDeclaration(SyntaxFactory
                                             .GenericName(SyntaxFactory.Identifier("Task"))
-                                            .AddTypeArgumentListArguments(ResolveType(tool.OutputType)),
+                                            .AddTypeArgumentListArguments(ResolveType(tool.ResultType)),
+                                        "_" + tool.Name.Pascalize())
+                                    .WithModifiers(SyntaxFactory.TokenList(
+                                        SyntaxFactory.Token(SyntaxKind.PrivateKeyword)
+                                    ))
+                                    .AddParameterListParameters(SyntaxFactory
+                                        .Parameter(SyntaxFactory.Identifier("param"))
+                                        .WithType(SyntaxFactory.ParseTypeName(tool.Name.Pascalize() + "Request"))
+                                    )
+                                    .WithExpressionBody(SyntaxFactory.ArrowExpressionClause(
+                                        SyntaxFactory.ParseExpression(
+                                            $"{tool.Name.Pascalize()}({string.Join(", ", tool.Parameters.Select(p => $"param.{p.Name.Pascalize()}"))})")
+                                    ))
+                                    .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
+                            )
+                            .Cast<MemberDeclarationSyntax>()
+                            .ToArray()
+                    )
+                    .AddMembers(
+                        _protocol.Tools
+                            .Select(tool =>
+                                SyntaxFactory.MethodDeclaration(SyntaxFactory
+                                            .GenericName(SyntaxFactory.Identifier("Task"))
+                                            .AddTypeArgumentListArguments(ResolveType(tool.ResultType)),
                                         tool.Name.Pascalize())
                                     .WithModifiers(SyntaxFactory.TokenList(
                                         SyntaxFactory.Token(SyntaxKind.ProtectedKeyword),
                                         SyntaxFactory.Token(SyntaxKind.AbstractKeyword)
                                     ))
-                                    .AddParameterListParameters(SyntaxFactory
-                                        .Parameter(SyntaxFactory.Identifier("param"))
-                                        .WithType(SyntaxFactory.NullableType(ResolveType(tool.InputType)))
+                                    .AddParameterListParameters(tool.Parameters.Select(parameter => SyntaxFactory
+                                            .Parameter(SyntaxFactory.Identifier(parameter.Name))
+                                            .WithType(ResolveType(parameter.Type))
+                                        ).ToArray()
                                     )
                                     .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
                             )
@@ -217,6 +246,29 @@ namespace Avalux.OpenAi.Client.Tools
                             SyntaxFactory.PropertyDeclaration(ResolveType(item.Value), item.Key.Pascalize())
                                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
                                 .AddAttributeLists(GenerateJsonPropertyNameAttribute(item.Key))
+                                .AddAccessorListAccessors(
+                                    SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                                        .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)),
+                                    SyntaxFactory.AccessorDeclaration(SyntaxKind.InitAccessorDeclaration)
+                                        .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)))
+                        )
+                        .Cast<MemberDeclarationSyntax>()
+                        .ToArray()
+                );
+        }
+
+        private ClassDeclarationSyntax GenerateToolRequestModelClass(ProtocolTool tool)
+        {
+            return SyntaxFactory.ClassDeclaration(SyntaxFactory.Identifier(tool.Name.Pascalize() + "Request"))
+                .AddModifiers(
+                    SyntaxFactory.Token(SyntaxKind.PrivateKeyword)
+                )
+                .AddMembers(
+                    tool.Parameters
+                        .Select(item =>
+                            SyntaxFactory.PropertyDeclaration(ResolveType(item.Type), item.Name.Pascalize())
+                                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+                                .AddAttributeLists(GenerateJsonPropertyNameAttribute(item.Name))
                                 .AddAccessorListAccessors(
                                     SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
                                         .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)),
