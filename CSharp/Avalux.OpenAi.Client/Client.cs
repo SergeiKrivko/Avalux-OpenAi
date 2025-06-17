@@ -10,6 +10,7 @@ public class Client
     private readonly HttpClient _httpClient;
 
     private AiTool[] _tools = [];
+    public string BaseModel { get; set; } = "auto";
 
     public Client(HttpClient httpClient)
     {
@@ -30,25 +31,25 @@ public class Client
 
     private readonly List<Function> _functions = [];
 
-    public async Task<string?> SendTextRequestAsync<TIn>(string prompt, TIn request)
+    public async Task<string?> SendTextRequestAsync<TIn>(string prompt, TIn request, string? model = null)
     {
-        var resp = await SendRequestAsync(prompt, request);
+        var resp = await SendRequestAsync(prompt, request, model);
         return resp == null ? null : ProcessTextResult(resp);
     }
 
-    public async Task<TOut?> SendJsonRequestAsync<TIn, TOut>(string prompt, TIn request)
+    public async Task<TOut?> SendJsonRequestAsync<TIn, TOut>(string prompt, TIn request, string? model = null)
     {
-        var resp = await SendRequestAsync(prompt, request);
+        var resp = await SendRequestAsync(prompt, request, model);
         return resp == null ? default : ProcessJsonResult<TOut>(resp);
     }
 
-    public async Task<string?> SendCodeRequestAsync<TIn>(string prompt, TIn request)
+    public async Task<string?> SendCodeRequestAsync<TIn>(string prompt, TIn request, string? model = null)
     {
-        var resp = await SendRequestAsync(prompt, request);
+        var resp = await SendRequestAsync(prompt, request, model);
         return resp == null ? null : ProcessCodeResult(resp);
     }
 
-    private async Task<string?> SendRequestAsync<TIn>(string prompt, TIn request)
+    private async Task<string?> SendRequestAsync<TIn>(string prompt, TIn request, string? model = null)
     {
         var resp = await SendInitAsync(prompt, request);
         for (int i = 0; i < MaxToolCalls; i++)
@@ -70,7 +71,9 @@ public class Client
 
                     resp = await SendAsync(new AiRequestModel
                     {
-                        Messages = messages.Concat(await CallToolsAsync(lastMessage)).ToArray()
+                        Messages = messages.Concat(await CallToolsAsync(lastMessage)).ToArray(),
+                        Tools = _tools,
+                        Model = model ?? BaseModel,
                     });
                     break;
                 }
@@ -131,7 +134,7 @@ public class Client
         return result;
     }
 
-    private async Task<AiResponseModel> SendInitAsync<TIn>(string prompt, TIn request)
+    private async Task<AiResponseModel> SendInitAsync<TIn>(string prompt, TIn request, string? model = null)
     {
         var content = JsonContent.Create(new AiRequestModel
         {
@@ -148,7 +151,8 @@ public class Client
                     Content = JsonSerializer.Serialize(request)
                 },
             ],
-            Tools = _tools
+            Tools = _tools,
+            Model = model ?? BaseModel,
         }, options: new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
@@ -172,16 +176,16 @@ public class Client
             return messages;
         foreach (var toolCall in message.ToolCalls)
         {
-            Console.WriteLine($"Calling tool {toolCall.Function.Name}({toolCall.Function.Arguments})");
-            var function = _functions.Single(f => f.Name == toolCall.Function.Name);
+            Console.WriteLine($"Calling tool {toolCall.Name}({toolCall.Arguments})");
+            var function = _functions.Single(f => f.Name == toolCall.Name);
             object? res;
             try
             {
-                res = await function.Func(toolCall.Function.Arguments);
+                res = await function.Func(toolCall.Arguments);
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error in tool call: {toolCall.Function.Name}: {e.Message}");
+                Console.WriteLine($"Error in tool call: {toolCall.Name}: {e.Message}");
                 res = null;
             }
 
