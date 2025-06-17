@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <ProtocolFiles Include="Protocol.yml"/>
+        <None Include="Prompts/*.prompt.txt" CopyToOutputDirectory="PreserveNewest"/>
     </ItemGroup>
 
 
