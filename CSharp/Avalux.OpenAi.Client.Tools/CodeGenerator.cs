@@ -131,15 +131,15 @@ namespace Avalux.OpenAi.Client.Tools
                     )
                     .AddMembers(
                         SyntaxFactory.ParseMemberDeclaration(
-                            $"protected {_protocol.Name.Pascalize()}ClientBase(Uri apiUri)\n" +
+                            $"protected {_protocol.Name.Pascalize()}ClientBase(Uri apiUri, string? model = null)\n" +
                             "{\n" +
-                            "    _client = new Avalux.OpenAi.Client.Client(new HttpClient { BaseAddress = apiUri });\n" +
+                            "    _client = new Avalux.OpenAi.Client.Client(new HttpClient { BaseAddress = apiUri }) { BaseModel = model ?? \"auto\" };\n" +
                             "    _Initialize();\n" +
                             "}") ?? throw new Exception("Internal error"),
                         SyntaxFactory.ParseMemberDeclaration(
-                            $"protected {_protocol.Name.Pascalize()}ClientBase(HttpClient httpClient)\n" +
+                            $"protected {_protocol.Name.Pascalize()}ClientBase(HttpClient httpClient, string? model = null)\n" +
                             "{\n" +
-                            "    _client = new Avalux.OpenAi.Client.Client(httpClient);\n" +
+                            "    _client = new Avalux.OpenAi.Client.Client(httpClient) { BaseModel = model ?? \"auto\" };\n" +
                             "    _Initialize();\n" +
                             "}") ?? throw new Exception("Internal error"),
                         SyntaxFactory.ParseMemberDeclaration(

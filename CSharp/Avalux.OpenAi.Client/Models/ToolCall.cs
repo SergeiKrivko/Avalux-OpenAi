@@ -6,7 +6,7 @@ public class ToolCall
 {
     [JsonPropertyName("id")] public required string Id { get; init; }
 
-    [JsonPropertyName("type")] public string? Type { get; init; }
+    [JsonPropertyName("name")] public required string Name { get; init; }
 
-    [JsonPropertyName("function")] public required FunctionCall Function { get; init; }
+    [JsonPropertyName("arguments")] public required string Arguments { get; init; }
 }
