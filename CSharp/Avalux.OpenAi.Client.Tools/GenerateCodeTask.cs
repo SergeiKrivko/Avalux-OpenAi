@@ -12,6 +12,8 @@ namespace Avalux.OpenAi.Client.Tools
         [Required] public ITaskItem[] ProtocolFiles { get; set; }
 
         [Required] public string OutputDirectory { get; set; }
+        [Required] public string ProjectDirectory { get; set; }
+        [Required] public string RootNamespace { get; set; }
 
         public override bool Execute()
         {
@@ -26,13 +28,15 @@ namespace Avalux.OpenAi.Client.Tools
                     var protocol = protocolParser.ParseFile(file.ItemSpec);
                     var generator = new CodeGenerator(protocol);
 
-                    var generatedCode = generator.GenerateCode(protocol.Name.Pascalize() + ".Client");
+                    var generatedCode = generator.GenerateCode(RootNamespace);
 
                     var outputPath = Path.Combine(
                         OutputDirectory,
                         Path.GetFileNameWithoutExtension(file.ItemSpec.Pascalize()) + "Client.generated.cs");
 
                     File.WriteAllText(outputPath, generatedCode);
+                    
+                    generator.GeneratePromptFiles(ProjectDirectory);
                 }
 
                 return true;
