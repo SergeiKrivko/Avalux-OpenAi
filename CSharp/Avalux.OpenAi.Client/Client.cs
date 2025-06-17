@@ -24,7 +24,7 @@ public class Client
     public int MaxToolCalls { get; set; } = 100;
     public int MaxRetries { get; set; } = 3;
 
-    private const string Url = "/api/v1/request";
+    private const string Url = "/api/v1/openai/request";
 
     private record Function(string Name, Func<string, Task<object?>> Func);
 
