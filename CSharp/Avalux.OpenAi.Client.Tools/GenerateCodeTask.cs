@@ -26,7 +26,7 @@ namespace Avalux.OpenAi.Client.Tools
 
                     var protocolParser = new ProtocolParser();
                     var protocol = protocolParser.ParseFile(file.ItemSpec);
-                    var generator = new CodeGenerator(protocol);
+                    var generator = new CodeGenerator(protocol, ProjectDirectory);
 
                     var generatedCode = generator.GenerateCode(RootNamespace);
 

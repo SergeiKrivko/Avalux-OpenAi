@@ -6,6 +6,14 @@
         public IProtocolType InputType { get; set; }
         public IProtocolType OutputType { get; set; }
         public ProtocolEndpointMode Mode { get; set; }
+
+        public string ProcessPrompt(string source)
+        {
+            return source
+                .Replace("${InputExample}", "```json\n" + InputType.JsonExample() + "\n```")
+                .Replace("${OutputExample}", "```json\n" + OutputType.JsonExample() + "\n```")
+                .Replace("${EndpointName}", Name);
+        }
     }
 
     public enum ProtocolEndpointMode

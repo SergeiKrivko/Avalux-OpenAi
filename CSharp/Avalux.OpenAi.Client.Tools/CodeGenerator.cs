@@ -12,10 +12,12 @@ namespace Avalux.OpenAi.Client.Tools
     public class CodeGenerator
     {
         private readonly Avalux.OpenAi.Protocol.Models.Protocol _protocol;
+        private readonly string _projectPath;
 
-        public CodeGenerator(Avalux.OpenAi.Protocol.Models.Protocol protocol)
+        public CodeGenerator(Avalux.OpenAi.Protocol.Models.Protocol protocol, string projectPath)
         {
             _protocol = protocol;
+            _projectPath = projectPath;
         }
 
         public string GenerateCode(string codeNamespace)
@@ -239,7 +241,7 @@ namespace Avalux.OpenAi.Client.Tools
                 ? $"<{ResolveType(endpoint.InputType).ToFullString()}, {ResolveType(endpoint.OutputType).ToFullString()}>"
                 : $"<{ResolveType(endpoint.InputType).ToFullString()}>";
             return
-                $"await _client.Send{endpoint.Mode}RequestAsync{typeParam}(await File.ReadAllTextAsync(Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, \"Prompts\", \"{endpoint.Name.Pascalize()}.prompt.txt\")), param)";
+                $"await _client.Send{endpoint.Mode}RequestAsync{typeParam}({SymbolDisplay.FormatLiteral(endpoint.ProcessPrompt(File.ReadAllText(Path.Combine(_projectPath, "Prompts", endpoint.Name.Pascalize() + ".prompt.txt"))), true)}, param)";
         }
 
         private ClassDeclarationSyntax GenerateModelClass(ProtocolCustomType customType)
