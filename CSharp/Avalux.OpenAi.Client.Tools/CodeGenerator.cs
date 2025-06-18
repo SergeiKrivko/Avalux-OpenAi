@@ -28,7 +28,8 @@ namespace Avalux.OpenAi.Client.Tools
                     SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Text.Json.Serialization")),
                     SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Text.Json")),
                     SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Reflection")),
-                    SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("Avalux.OpenAi.Client"))
+                    SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("Avalux.OpenAi.Client")),
+                    SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("Avalux.OpenAi.Client.Models"))
                 );
 
             var namespaceDeclaration = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.IdentifierName(codeNamespace))
@@ -147,8 +148,7 @@ namespace Avalux.OpenAi.Client.Tools
                         SyntaxFactory.ParseMemberDeclaration(
                             $"private void _Initialize()\n" +
                             "{\n" +
-                            $"    {string.Join("\n", _protocol.Tools.Select(tool => $"_client.AddFunction<{tool.Name.Pascalize()}Request, " + $"{ResolveType(tool.ResultType).ToFullString()}>(\"{tool.Name}\", _{tool.Name.Pascalize()});"))}\n" +
-                            $"    _client.ReadToolFromString({SymbolDisplay.FormatLiteral(_protocol.GenerateToolsJson(), true)});\n" +
+                            $"    {string.Join("\n", _protocol.Tools.Select(tool => $"_client.AddFunction<{tool.Name.Pascalize()}Request, " + $"{ResolveType(tool.ResultType).ToFullString()}>(\"{tool.Name}\", _{tool.Name.Pascalize()}, JsonSerializer.Deserialize<AiTool>({SymbolDisplay.FormatLiteral(tool.GenerateJsonDefinition(), true)})!);"))}\n" +
                             "}") ?? throw new Exception("Internal error"),
                         SyntaxFactory.FieldDeclaration(
                                 SyntaxFactory
