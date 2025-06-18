@@ -1,0 +1,27 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <UsingTask TaskName="Avalux.OpenAi.Client.Tools.GenerateCodeTask"
+               AssemblyFile="$(MSBuildThisFileDirectory)..\tasks\netstandard2.0\Avalux.OpenAi.Client.Tools.dll"/>
+
+    <PropertyGroup>
+        <_ActualRootNamespace Condition="'$(RootNamespace)' == ''">$(MSBuildProjectName)</_ActualRootNamespace>
+        <_ActualRootNamespace Condition="'$(RootNamespace)' != ''">$(RootNamespace)</_ActualRootNamespace>
+    </PropertyGroup>
+
+    <Target Name="GenerateAvaluxOpenAiClientCodeOnChange" BeforeTargets="SourceFilesProjectOutputGroup">
+        <GenerateCodeTask ProtocolFiles="@(ProtocolFiles)" OutputDirectory="$(IntermediateOutputPath)"
+                          RootNamespace="$(_ActualRootNamespace)" ProjectDirectory="$(MSBuildProjectDirectory)"/>
+
+        <ItemGroup>
+            <Compile Include="$(IntermediateOutputPath)*.generated.cs"/>
+        </ItemGroup>
+    </Target>
+
+    <Target Name="GenerateAvaluxOpenAiClientCodeOnCompile" BeforeTargets="CoreCompile">
+        <GenerateCodeTask ProtocolFiles="@(ProtocolFiles)" OutputDirectory="$(IntermediateOutputPath)"
+                          RootNamespace="$(_ActualRootNamespace)" ProjectDirectory="$(MSBuildProjectDirectory)"/>
+
+        <ItemGroup>
+            <Compile Include="$(IntermediateOutputPath)*.generated.cs"/>
+        </ItemGroup>
+    </Target>
+</Project>

@@ -1,8 +1,8 @@
-﻿name: Build and publish Avalux.OpenAi.Client package
+﻿name: Build and publish Avalux.OpenAi.Client.Tools Nuget package
 on:
   push:
     paths:
-      - CSharp/Avalux.OpenAi.Client/Avalux.OpenAi.Client.csproj
+      - CSharp/Avalux.OpenAi.Client.Tools/Avalux.OpenAi.Client.Tools.csproj
 
 jobs:
   build-package:
@@ -20,8 +20,8 @@ jobs:
       - name: Build
         run: |
           mkdir nuget
-          dotnet build CSharp/Avalux.OpenAi.Client -c Release
-          dotnet pack CSharp/Avalux.OpenAi.Client -o nuget
+          dotnet build CSharp/Avalux.OpenAi.Client.Tools -c Release
+          dotnet pack CSharp/Avalux.OpenAi.Client.Tools -o nuget
 
       - name: Publish on nuget.org
         run: |

@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProtocolFiles Include="Protocol.yml"/>
+    </ItemGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="Avalux.OpenAi.Client" Version="0.1.4"/>
+        <PackageReference Include="Avalux.OpenAi.Client.Tools" Version="0.1.23"/>
+    </ItemGroup>
+
+</Project>

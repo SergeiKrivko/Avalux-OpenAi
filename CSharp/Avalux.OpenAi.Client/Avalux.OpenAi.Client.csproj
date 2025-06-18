@@ -4,8 +4,8 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <PackageId>Avalux.OpenAi.Client.Tools</PackageId>
-        <PackageVersion>0.0.1</PackageVersion>
+        <PackageId>Avalux.OpenAi.Client</PackageId>
+        <PackageVersion>0.1.4</PackageVersion>
 
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
