@@ -8,8 +8,6 @@ namespace Avalux.OpenAi.Client;
 public class Client
 {
     private readonly HttpClient _httpClient;
-
-    private AiTool[] _tools = [];
     public string BaseModel { get; set; } = "auto";
 
     public Client(HttpClient httpClient)
@@ -27,7 +25,7 @@ public class Client
 
     private const string Url = "/api/v1/openai/request";
 
-    private record Function(string Name, Func<string, Task<object?>> Func);
+    private record Function(string Name, Func<string, Task<object?>> Func, AiTool ToolDefinition);
 
     private readonly List<Function> _functions = [];
 
@@ -72,7 +70,7 @@ public class Client
                     resp = await SendAsync(new AiRequestModel
                     {
                         Messages = messages.Concat(await CallToolsAsync(lastMessage)).ToArray(),
-                        Tools = _tools,
+                        Tools = _functions.Select(f => f.ToolDefinition).ToArray(),
                         Model = model ?? BaseModel,
                     });
                     break;
@@ -151,7 +149,7 @@ public class Client
                     Content = JsonSerializer.Serialize(request)
                 },
             ],
-            Tools = _tools,
+            Tools = _functions.Select(f => f.ToolDefinition).ToArray(),
             Model = model ?? BaseModel,
         }, options: new JsonSerializerOptions
         {
@@ -200,29 +198,12 @@ public class Client
         return messages;
     }
 
-    public void AddFunction<TIn, TOut>(string name, Func<TIn?, Task<TOut>> func)
+    public void AddFunction<TIn, TOut>(string name, Func<TIn?, Task<TOut>> func, AiTool toolDefinition)
     {
         _functions.Add(new Function(name, async data =>
         {
             var param = JsonSerializer.Deserialize<TIn>(data);
             return await func(param);
-        }));
-    }
-
-    public async Task ReadToolFromFileAsync(string filePath)
-    {
-        var content = await File.ReadAllTextAsync(filePath);
-        _tools = JsonSerializer.Deserialize<AiTool[]>(content) ?? throw new Exception("Failed to deserialize tools");
-    }
-
-    public void ReadToolFromFile(string filePath)
-    {
-        var content = File.ReadAllText(filePath);
-        _tools = JsonSerializer.Deserialize<AiTool[]>(content) ?? throw new Exception("Failed to deserialize tools");
-    }
-
-    public void ReadToolFromString(string tools)
-    {
-        _tools = JsonSerializer.Deserialize<AiTool[]>(tools) ?? throw new Exception("Failed to deserialize tools");
+        }, toolDefinition));
     }
 }

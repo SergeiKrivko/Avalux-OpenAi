@@ -28,17 +28,5 @@ namespace Avalux.OpenAi.Protocol.Models
                 return result;
             throw new Exception($"Unknown type: {type}");
         }
-
-        public string GenerateToolsJson()
-        {
-            var res = Tools.Select(tool => new ApiTool
-                {
-                    Name = tool.Name,
-                    Description = tool.Description,
-                    Parameters = tool.Parameters.Select(p => p.ToApiParameter()).ToArray()
-                }
-            ).ToArray();
-            return JsonSerializer.Serialize(res);
-        }
     }
 }
