@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Avalux.OpenAi.Protocol.Models
 {
@@ -18,6 +19,18 @@ namespace Avalux.OpenAi.Protocol.Models
         public string JsonExample()
         {
             return InnerType.JsonExample();
+        }
+
+        public string JsonExample(Dictionary<string, int> recurse)
+        {
+            if (InnerType.IsRecurseMaximumExceeded(recurse))
+                return "null";
+            return InnerType.JsonExample(recurse);
+        }
+
+        public bool IsRecurseMaximumExceeded(Dictionary<string, int> recurse)
+        {
+            return InnerType.IsRecurseMaximumExceeded(recurse);
         }
     }
 }

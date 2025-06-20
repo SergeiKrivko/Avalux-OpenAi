@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 
@@ -55,6 +56,16 @@ namespace Avalux.OpenAi.Protocol.Models
                 default:
                     throw new ArgumentException($"Unknown built-in type: {Name}");
             }
+        }
+
+        public string JsonExample(Dictionary<string, int> recurse)
+        {
+            return JsonExample();
+        }
+
+        public bool IsRecurseMaximumExceeded(Dictionary<string, int> recurse)
+        {
+            return false;
         }
     }
 }
