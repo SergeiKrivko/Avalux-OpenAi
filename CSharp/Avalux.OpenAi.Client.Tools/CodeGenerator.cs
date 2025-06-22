@@ -106,9 +106,15 @@ namespace Avalux.OpenAi.Client.Tools
                                 SyntaxFactory.NullableType(ResolveType(protocolEndpoint.OutputType))),
                         SyntaxFactory.Identifier(protocolEndpoint.Name.Pascalize()))
                     .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword)))
-                    .AddParameterListParameters(SyntaxFactory
-                        .Parameter(SyntaxFactory.Identifier("param"))
-                        .WithType(ResolveType(protocolEndpoint.InputType))
+                    .AddParameterListParameters(
+                        SyntaxFactory.Parameter(SyntaxFactory.Identifier("param"))
+                            .WithType(ResolveType(protocolEndpoint.InputType)),
+                        SyntaxFactory.Parameter(SyntaxFactory.Identifier("model"))
+                            .WithType(SyntaxFactory.ParseTypeName("string?"))
+                            .WithDefault(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseExpression("null"))),
+                        SyntaxFactory.Parameter(SyntaxFactory.Identifier("onToolCalled"))
+                            .WithType(SyntaxFactory.ParseTypeName("Action<ToolCallbackArgs>?"))
+                            .WithDefault(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseExpression("null")))
                     )
                     .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
                 interfaceDeclaration = interfaceDeclaration.AddMembers(method);
@@ -146,7 +152,7 @@ namespace Avalux.OpenAi.Client.Tools
                             "    _Initialize();\n" +
                             "}") ?? throw new Exception("Internal error"),
                         SyntaxFactory.ParseMemberDeclaration(
-                            $"private void _Initialize()\n" +
+                            "private void _Initialize()\n" +
                             "{\n" +
                             $"    {string.Join("\n", _protocol.Tools.Select(tool => $"_client.AddFunction<{tool.Name.Pascalize()}Request, " + $"{ResolveType(tool.ResultType).ToFullString()}>(\"{tool.Name}\", _{tool.Name.Pascalize()}, JsonSerializer.Deserialize<AiTool>({SymbolDisplay.FormatLiteral(tool.GenerateJsonDefinition(), true)})!);"))}\n" +
                             "}") ?? throw new Exception("Internal error"),
@@ -172,9 +178,15 @@ namespace Avalux.OpenAi.Client.Tools
                                 .WithExplicitInterfaceSpecifier(
                                     SyntaxFactory.ExplicitInterfaceSpecifier(
                                         SyntaxFactory.IdentifierName(ClientInterfaceName)))
-                                .AddParameterListParameters(SyntaxFactory
-                                    .Parameter(SyntaxFactory.Identifier("param"))
-                                    .WithType(ResolveType(endpoint.InputType))
+                                .AddParameterListParameters(
+                                    SyntaxFactory.Parameter(SyntaxFactory.Identifier("param"))
+                                        .WithType(ResolveType(endpoint.InputType)),
+                                    SyntaxFactory.Parameter(SyntaxFactory.Identifier("model"))
+                                        .WithType(SyntaxFactory.ParseTypeName("string?"))
+                                        .WithDefault(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseExpression("null"))),
+                                    SyntaxFactory.Parameter(SyntaxFactory.Identifier("onToolCalled"))
+                                        .WithType(SyntaxFactory.ParseTypeName("Action<ToolCallbackArgs>?"))
+                                        .WithDefault(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseExpression("null")))
                                 )
                                 .WithExpressionBody(SyntaxFactory.ArrowExpressionClause(
                                     SyntaxFactory.ParseExpression(GetEndpointExpression(endpoint))))
@@ -241,7 +253,7 @@ namespace Avalux.OpenAi.Client.Tools
                 ? $"<{ResolveType(endpoint.InputType).ToFullString()}, {ResolveType(endpoint.OutputType).ToFullString()}>"
                 : $"<{ResolveType(endpoint.InputType).ToFullString()}>";
             return
-                $"await _client.Send{endpoint.Mode}RequestAsync{typeParam}({SymbolDisplay.FormatLiteral(endpoint.ProcessPrompt(File.ReadAllText(Path.Combine(_projectPath, "Prompts", endpoint.Name.Pascalize() + ".prompt.txt"))), true)}, param)";
+                $"await _client.Send{endpoint.Mode}RequestAsync{typeParam}({SymbolDisplay.FormatLiteral(endpoint.ProcessPrompt(File.ReadAllText(Path.Combine(_projectPath, "Prompts", endpoint.Name.Pascalize() + ".prompt.txt"))), true)}, param, model, onToolCalled)";
         }
 
         private ClassDeclarationSyntax GenerateModelClass(ProtocolCustomType customType)
