@@ -29,25 +29,29 @@ public class Client
 
     private readonly List<Function> _functions = [];
 
-    public async Task<string?> SendTextRequestAsync<TIn>(string prompt, TIn request, string? model = null)
+    public async Task<string?> SendTextRequestAsync<TIn>(string prompt, TIn request, string? model = null,
+        Action<ToolCallbackArgs>? onToolCalled = null)
     {
-        var resp = await SendRequestAsync(prompt, request, model);
+        var resp = await SendRequestAsync(prompt, request, model, onToolCalled);
         return resp == null ? null : ProcessTextResult(resp);
     }
 
-    public async Task<TOut?> SendJsonRequestAsync<TIn, TOut>(string prompt, TIn request, string? model = null)
+    public async Task<TOut?> SendJsonRequestAsync<TIn, TOut>(string prompt, TIn request, string? model = null,
+        Action<ToolCallbackArgs>? onToolCalled = null)
     {
-        var resp = await SendRequestAsync(prompt, request, model);
+        var resp = await SendRequestAsync(prompt, request, model, onToolCalled);
         return resp == null ? default : ProcessJsonResult<TOut>(resp);
     }
 
-    public async Task<string?> SendCodeRequestAsync<TIn>(string prompt, TIn request, string? model = null)
+    public async Task<string?> SendCodeRequestAsync<TIn>(string prompt, TIn request, string? model = null,
+        Action<ToolCallbackArgs>? onToolCalled = null)
     {
-        var resp = await SendRequestAsync(prompt, request, model);
+        var resp = await SendRequestAsync(prompt, request, model, onToolCalled);
         return resp == null ? null : ProcessCodeResult(resp);
     }
 
-    private async Task<string?> SendRequestAsync<TIn>(string prompt, TIn request, string? model = null)
+    private async Task<string?> SendRequestAsync<TIn>(string prompt, TIn request, string? model = null,
+        Action<ToolCallbackArgs>? onToolCalled = null)
     {
         var resp = await SendInitAsync(prompt, request);
         for (int i = 0; i < MaxToolCalls; i++)
@@ -69,7 +73,7 @@ public class Client
 
                     resp = await SendAsync(new AiRequestModel
                     {
-                        Messages = messages.Concat(await CallToolsAsync(lastMessage)).ToArray(),
+                        Messages = messages.Concat(await CallToolsAsync(lastMessage, onToolCalled)).ToArray(),
                         Tools = _functions.Select(f => f.ToolDefinition).ToArray(),
                         Model = model ?? BaseModel,
                     });
@@ -167,7 +171,7 @@ public class Client
         return result;
     }
 
-    private async Task<List<AiMessage>> CallToolsAsync(AiMessage message)
+    private async Task<List<AiMessage>> CallToolsAsync(AiMessage message, Action<ToolCallbackArgs>? onToolCalled = null)
     {
         var messages = new List<AiMessage>();
         if (message.ToolCalls == null)
@@ -176,7 +180,8 @@ public class Client
         {
             Console.WriteLine($"Calling tool {toolCall.Name}({toolCall.Arguments})");
             var function = _functions.Single(f => f.Name == toolCall.Name);
-            object? res;
+            object? res = null;
+            Exception? exception = null;
             try
             {
                 res = await function.Func(toolCall.Arguments);
@@ -184,8 +189,19 @@ public class Client
             catch (Exception e)
             {
                 Console.WriteLine($"Error in tool call: {toolCall.Name}: {e.Message}");
-                res = null;
+                exception = e;
             }
+
+            if (onToolCalled != null)
+                onToolCalled(new ToolCallbackArgs
+                {
+                    ToolName = function.Name,
+                    ToolDescription = function.ToolDefinition.Description,
+                    Parameter = toolCall.Arguments,
+                    IsSuccess = exception == null,
+                    Exception = exception,
+                    Result = res,
+                });
 
             messages.Add(new AiMessage
             {
