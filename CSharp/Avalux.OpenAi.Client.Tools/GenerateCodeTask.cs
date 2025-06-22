@@ -28,6 +28,8 @@ namespace Avalux.OpenAi.Client.Tools
                     var protocol = protocolParser.ParseFile(file.ItemSpec);
                     var generator = new CodeGenerator(protocol, ProjectDirectory);
 
+                    generator.GeneratePromptFiles(ProjectDirectory);
+
                     var generatedCode = generator.GenerateCode(RootNamespace);
 
                     var outputPath = Path.Combine(
@@ -36,8 +38,6 @@ namespace Avalux.OpenAi.Client.Tools
                         $"{protocol.Name.Pascalize()}.generated.cs");
 
                     File.WriteAllText(outputPath, generatedCode);
-
-                    generator.GeneratePromptFiles(ProjectDirectory);
                 }
 
                 return true;

@@ -10,12 +10,12 @@ public class MyOpenAiClient : MyOpenAiClientClientBase
     {
     }
 
-    protected override Task<IWeatherClient.WeatherForecast[]> GetWeather(DateOnly from, DateOnly to)
+    protected override Task<IMyOpenAiClient.WeatherForecast[]> GetWeather(DateOnly from, DateOnly to)
     {
-        var res = new List<IWeatherClient.WeatherForecast>();
+        var res = new List<IMyOpenAiClient.WeatherForecast>();
         while (from <= to)
         {
-            res.Add(new IWeatherClient.WeatherForecast
+            res.Add(new IMyOpenAiClient.WeatherForecast
             {
                 Date = from,
                 Temperature = Random.Shared.Next(-20, 30),

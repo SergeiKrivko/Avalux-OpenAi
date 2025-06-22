@@ -1,4 +1,6 @@
-﻿namespace Avalux.OpenAi.Protocol.Models
+﻿using System.Collections.Generic;
+
+namespace Avalux.OpenAi.Protocol.Models
 {
     public class ProtocolArrayType : IProtocolType
     {
@@ -14,6 +16,18 @@
         public string JsonExample()
         {
             return $"[ {ArrayType.JsonExample()} ]";
+        }
+
+        public string JsonExample(Dictionary<string, int> recurse)
+        {
+            if (ArrayType.IsRecurseMaximumExceeded(recurse))
+                return "[]";
+            return $"[ {ArrayType.JsonExample(recurse)} ]";
+        }
+
+        public bool IsRecurseMaximumExceeded(Dictionary<string, int> recurse)
+        {
+            return ArrayType.IsRecurseMaximumExceeded(recurse);
         }
     }
 }

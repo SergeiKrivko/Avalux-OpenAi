@@ -31,15 +31,39 @@ namespace Avalux.OpenAi.Protocol.Models
 
         public string JsonExample()
         {
-            return $"{{ {string.Join(", ", Fields.Keys.Select(item => $"\"{item}\": {GetFieldExample(item)}"))} }}";
+            return JsonExample(new Dictionary<string, int>());
         }
 
-        private string GetFieldExample(string fieldName)
+        public string JsonExample(Dictionary<string, int> recurse)
+        {
+            recurse = recurse.ToDictionary(e => e.Key, e => e.Value);
+            if (recurse.TryGetValue(Name, out var level))
+                recurse[Name] = level + 1;
+            else
+                recurse.Add(Name, 1);
+
+            return
+                $"{{ {string.Join(", ", Fields.Keys.Select(item => $"\"{item}\": {GetFieldExample(item, recurse)}"))} }}";
+        }
+
+        private string GetFieldExample(string fieldName, Dictionary<string, int> recurse)
         {
             var source = FieldsSource.FirstOrDefault(item => item.Name == fieldName);
             if (!string.IsNullOrWhiteSpace(source?.Example))
                 return source.Example;
-            return Fields[fieldName].JsonExample();
+            return Fields[fieldName].JsonExample(recurse);
+        }
+
+        private const int MaxRecurseDepth = 1;
+
+        public bool IsRecurseMaximumExceeded(Dictionary<string, int> recurse)
+        {
+            if (recurse.TryGetValue(Name, out var level))
+            {
+                return level > MaxRecurseDepth;
+            }
+
+            return false;
         }
     }
 }
