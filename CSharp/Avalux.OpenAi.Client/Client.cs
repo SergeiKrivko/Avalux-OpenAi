@@ -73,7 +73,7 @@ public class Client
 
                     resp = await SendAsync(new AiRequestModel
                     {
-                        Messages = messages.Concat(await CallToolsAsync(lastMessage, options?.OnToolCalled)).ToArray(),
+                        Messages = messages.Concat(await CallToolsAsync(lastMessage, context, options?.OnToolCalled)).ToArray(),
                         Tools = _functions.Select(f => f.ToolDefinition).ToArray(),
                         Model = options?.Model ?? BaseModel,
                     });
@@ -233,7 +233,7 @@ public class Client
         }, toolDefinition));
     }
 
-    public void AddFunction<TIn, TContext, TOut>(string name, Func<TIn?, Task<TOut>> func, AiTool toolDefinition)
+    public void AddFunction<TIn, TOut>(string name, Func<TIn?, Task<TOut>> func, AiTool toolDefinition)
     {
         _functions.Add(new Function(name, async (data, _) =>
         {

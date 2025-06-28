@@ -11,8 +11,8 @@
     </ItemGroup>
     
     <ItemGroup>
-        <PackageReference Include="Avalux.OpenAi.Client" Version="0.1.6"/>
-        <PackageReference Include="Avalux.OpenAi.Client.Tools" Version="0.1.26"/>
+        <PackageReference Include="Avalux.OpenAi.Client" Version="0.2.1"/>
+        <PackageReference Include="Avalux.OpenAi.Client.Tools" Version="0.2.0"/>
     </ItemGroup>
 
 </Project>

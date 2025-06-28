@@ -10,6 +10,6 @@ namespace Avalux.OpenAi.Protocol.Schemas
         public Dictionary<string, ApiEndpointSchema> Endpoints { get; set; } = new Dictionary<string, ApiEndpointSchema>();
         public Dictionary<string, ApiToolSchema> Tools { get; set; } = new Dictionary<string, ApiToolSchema>();
         public Dictionary<string, ApiSchemaFieldSchema[]> Schemas { get; set; } = new Dictionary<string, ApiSchemaFieldSchema[]>();
-        public string ContextType { get; set; } = string.Empty;
+        public string Context { get; set; } = string.Empty;
     }
 }
