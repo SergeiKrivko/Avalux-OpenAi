@@ -48,7 +48,8 @@ namespace Avalux.OpenAi.Protocol
                 protocol.Endpoints.Add(ParseEndpoint(item.Key, item.Value, protocol));
             }
 
-            protocol.ContextType = protocol.ResolveType(apiSchema.ContextType);
+            if (protocol.ContextType != null)
+                protocol.ContextType = protocol.ResolveType(apiSchema.ContextType);
 
             return protocol;
         }
