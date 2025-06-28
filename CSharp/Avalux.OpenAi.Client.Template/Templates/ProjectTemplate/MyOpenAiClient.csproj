@@ -12,7 +12,7 @@
     
     <ItemGroup>
         <PackageReference Include="Avalux.OpenAi.Client" Version="0.2.1"/>
-        <PackageReference Include="Avalux.OpenAi.Client.Tools" Version="0.2.0"/>
+        <PackageReference Include="Avalux.OpenAi.Client.Tools" Version="0.2.2"/>
     </ItemGroup>
 
 </Project>
