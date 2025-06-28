@@ -23,7 +23,11 @@ namespace Avalux.OpenAi.Protocol
         private Models.Protocol Parse(string data, string defaultName)
         {
             var apiSchema = _deserializer.Deserialize<ApiSchema>(data);
-            var protocol = new Models.Protocol { Name = apiSchema.Name ?? defaultName };
+            var protocol = new Models.Protocol
+            {
+                Name = apiSchema.Name ?? defaultName,
+                Version = Version.Parse(apiSchema.Version)
+            };
             foreach (var item in apiSchema.Schemas)
             {
                 protocol.CustomTypes[item.Key] = new ProtocolCustomType(item.Key, item.Value);
@@ -43,6 +47,9 @@ namespace Avalux.OpenAi.Protocol
             {
                 protocol.Endpoints.Add(ParseEndpoint(item.Key, item.Value, protocol));
             }
+
+            if (!string.IsNullOrWhiteSpace(apiSchema.Context))
+                protocol.ContextType = protocol.ResolveType(apiSchema.Context);
 
             return protocol;
         }

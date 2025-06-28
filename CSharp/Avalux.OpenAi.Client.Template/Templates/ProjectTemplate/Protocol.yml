@@ -1,4 +1,5 @@
-﻿name: MyOpenAiClient
+﻿version: 1.0
+name: MyOpenAiClient
 
 endpoints:
   GetForecast:

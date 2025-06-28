@@ -8,6 +8,7 @@ namespace Avalux.OpenAi.Protocol.Models
     public class Protocol
     {
         public string Name { get; set; }
+        public Version Version { get; set; }
 
         public Dictionary<string, ProtocolCustomType> CustomTypes { get; } =
             new Dictionary<string, ProtocolCustomType>();
@@ -28,5 +29,7 @@ namespace Avalux.OpenAi.Protocol.Models
                 return result;
             throw new Exception($"Unknown type: {type}");
         }
+
+        public IProtocolType ContextType { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Humanizer;
 using Microsoft.CodeAnalysis;
@@ -106,16 +107,7 @@ namespace Avalux.OpenAi.Client.Tools
                                 SyntaxFactory.NullableType(ResolveType(protocolEndpoint.OutputType))),
                         SyntaxFactory.Identifier(protocolEndpoint.Name.Pascalize()))
                     .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword)))
-                    .AddParameterListParameters(
-                        SyntaxFactory.Parameter(SyntaxFactory.Identifier("param"))
-                            .WithType(ResolveType(protocolEndpoint.InputType)),
-                        SyntaxFactory.Parameter(SyntaxFactory.Identifier("model"))
-                            .WithType(SyntaxFactory.ParseTypeName("string?"))
-                            .WithDefault(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseExpression("null"))),
-                        SyntaxFactory.Parameter(SyntaxFactory.Identifier("onToolCalled"))
-                            .WithType(SyntaxFactory.ParseTypeName("Action<ToolCallbackArgs>?"))
-                            .WithDefault(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseExpression("null")))
-                    )
+                    .AddParameterListParameters(GenerateEndpointMethodParameters(protocolEndpoint))
                     .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
                 interfaceDeclaration = interfaceDeclaration.AddMembers(method);
             }
@@ -154,7 +146,7 @@ namespace Avalux.OpenAi.Client.Tools
                         SyntaxFactory.ParseMemberDeclaration(
                             "private void _Initialize()\n" +
                             "{\n" +
-                            $"    {string.Join("\n", _protocol.Tools.Select(tool => $"_client.AddFunction<{tool.Name.Pascalize()}Request, " + $"{ResolveType(tool.ResultType).ToFullString()}>(\"{tool.Name}\", _{tool.Name.Pascalize()}, JsonSerializer.Deserialize<AiTool>({SymbolDisplay.FormatLiteral(tool.GenerateJsonDefinition(), true)})!);"))}\n" +
+                            $"    {string.Join("\n", _protocol.Tools.Select(tool => $"_client.AddFunction<{tool.Name.Pascalize()}Request, " + (_protocol.ContextType == null ? "" : ResolveType(_protocol.ContextType).ToFullString() + ", ") + $"{ResolveType(tool.ResultType).ToFullString()}>(\"{tool.Name}\", _{tool.Name.Pascalize()}, JsonSerializer.Deserialize<AiTool>({SymbolDisplay.FormatLiteral(tool.GenerateJsonDefinition(), true)})!);"))}\n" +
                             "}") ?? throw new Exception("Internal error"),
                         SyntaxFactory.FieldDeclaration(
                                 SyntaxFactory
@@ -178,16 +170,7 @@ namespace Avalux.OpenAi.Client.Tools
                                 .WithExplicitInterfaceSpecifier(
                                     SyntaxFactory.ExplicitInterfaceSpecifier(
                                         SyntaxFactory.IdentifierName(ClientInterfaceName)))
-                                .AddParameterListParameters(
-                                    SyntaxFactory.Parameter(SyntaxFactory.Identifier("param"))
-                                        .WithType(ResolveType(endpoint.InputType)),
-                                    SyntaxFactory.Parameter(SyntaxFactory.Identifier("model"))
-                                        .WithType(SyntaxFactory.ParseTypeName("string?"))
-                                        .WithDefault(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseExpression("null"))),
-                                    SyntaxFactory.Parameter(SyntaxFactory.Identifier("onToolCalled"))
-                                        .WithType(SyntaxFactory.ParseTypeName("Action<ToolCallbackArgs>?"))
-                                        .WithDefault(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseExpression("null")))
-                                )
+                                .AddParameterListParameters(GenerateEndpointMethodParameters(endpoint))
                                 .WithExpressionBody(SyntaxFactory.ArrowExpressionClause(
                                     SyntaxFactory.ParseExpression(GetEndpointExpression(endpoint))))
                                 .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
@@ -201,45 +184,13 @@ namespace Avalux.OpenAi.Client.Tools
                         .ToArray())
                     .AddMembers(
                         _protocol.Tools
-                            .Select(tool =>
-                                SyntaxFactory.MethodDeclaration(SyntaxFactory
-                                            .GenericName(SyntaxFactory.Identifier("Task"))
-                                            .AddTypeArgumentListArguments(ResolveType(tool.ResultType)),
-                                        "_" + tool.Name.Pascalize())
-                                    .WithModifiers(SyntaxFactory.TokenList(
-                                        SyntaxFactory.Token(SyntaxKind.PrivateKeyword)
-                                    ))
-                                    .AddParameterListParameters(SyntaxFactory
-                                        .Parameter(SyntaxFactory.Identifier("param"))
-                                        .WithType(SyntaxFactory.ParseTypeName(tool.Name.Pascalize() + "Request"))
-                                    )
-                                    .WithExpressionBody(SyntaxFactory.ArrowExpressionClause(
-                                        SyntaxFactory.ParseExpression(
-                                            $"{tool.Name.Pascalize()}({string.Join(", ", tool.Parameters.Select(p => $"param.{p.Name.Pascalize()}"))})")
-                                    ))
-                                    .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
-                            )
+                            .Select(GenerateToolPrivateMethod)
                             .Cast<MemberDeclarationSyntax>()
                             .ToArray()
                     )
                     .AddMembers(
                         _protocol.Tools
-                            .Select(tool =>
-                                SyntaxFactory.MethodDeclaration(SyntaxFactory
-                                            .GenericName(SyntaxFactory.Identifier("Task"))
-                                            .AddTypeArgumentListArguments(ResolveType(tool.ResultType)),
-                                        tool.Name.Pascalize())
-                                    .WithModifiers(SyntaxFactory.TokenList(
-                                        SyntaxFactory.Token(SyntaxKind.ProtectedKeyword),
-                                        SyntaxFactory.Token(SyntaxKind.AbstractKeyword)
-                                    ))
-                                    .AddParameterListParameters(tool.Parameters.Select(parameter => SyntaxFactory
-                                            .Parameter(SyntaxFactory.Identifier(parameter.Name))
-                                            .WithType(ResolveType(parameter.Type))
-                                        ).ToArray()
-                                    )
-                                    .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
-                            )
+                            .Select(GenerateToolProtectedMethod)
                             .Cast<MemberDeclarationSyntax>()
                             .ToArray()
                     );
@@ -249,11 +200,88 @@ namespace Avalux.OpenAi.Client.Tools
 
         private string GetEndpointExpression(ProtocolEndpoint endpoint)
         {
-            var typeParam = endpoint.Mode == ProtocolEndpointMode.Json
-                ? $"<{ResolveType(endpoint.InputType).ToFullString()}, {ResolveType(endpoint.OutputType).ToFullString()}>"
-                : $"<{ResolveType(endpoint.InputType).ToFullString()}>";
-            return
-                $"await _client.Send{endpoint.Mode}RequestAsync{typeParam}({SymbolDisplay.FormatLiteral(endpoint.ProcessPrompt(File.ReadAllText(Path.Combine(_projectPath, "Prompts", endpoint.Name.Pascalize() + ".prompt.txt"))), true)}, param, model, onToolCalled)";
+            var typeParam = "<" + ResolveType(endpoint.InputType).ToFullString();
+            if (endpoint.Mode == ProtocolEndpointMode.Json)
+                typeParam += ", " + ResolveType(endpoint.OutputType);
+            typeParam += ">";
+            var res =
+                $"await _client.Send{endpoint.Mode}RequestAsync{typeParam}({SymbolDisplay.FormatLiteral(endpoint.ProcessPrompt(File.ReadAllText(Path.Combine(_projectPath, "Prompts", endpoint.Name.Pascalize() + ".prompt.txt"))), true)}";
+            res += ", param";
+            if (_protocol.ContextType != null)
+                res += ", context";
+            res += ", options)";
+            return res;
+        }
+
+        private ParameterSyntax[] GenerateEndpointMethodParameters(ProtocolEndpoint endpoint)
+        {
+            var res = new List<ParameterSyntax>();
+            res.Add(SyntaxFactory.Parameter(SyntaxFactory.Identifier("param"))
+                .WithType(ResolveType(endpoint.InputType)));
+            if (_protocol.ContextType != null)
+            {
+                var param = SyntaxFactory.Parameter(SyntaxFactory.Identifier("context"))
+                    .WithType(ResolveType(_protocol.ContextType));
+                if (_protocol.ContextType is ProtocolNullableType)
+                    param = param.WithDefault(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseExpression("null")));
+                res.Add(param);
+            }
+
+            res.Add(SyntaxFactory.Parameter(SyntaxFactory.Identifier("options"))
+                .WithType(SyntaxFactory.ParseTypeName("RequestOptions?"))
+                .WithDefault(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseExpression("null"))));
+            return res.ToArray();
+        }
+
+        private MethodDeclarationSyntax GenerateToolPrivateMethod(ProtocolTool tool)
+        {
+            var method = SyntaxFactory.MethodDeclaration(SyntaxFactory
+                        .GenericName(SyntaxFactory.Identifier("Task"))
+                        .AddTypeArgumentListArguments(ResolveType(tool.ResultType)),
+                    "_" + tool.Name.Pascalize())
+                .AddModifiers(
+                    SyntaxFactory.Token(SyntaxKind.PrivateKeyword)
+                )
+                .AddParameterListParameters(SyntaxFactory
+                    .Parameter(SyntaxFactory.Identifier("param"))
+                    .WithType(SyntaxFactory.ParseTypeName(tool.Name.Pascalize() + "Request"))
+                )
+                .WithExpressionBody(SyntaxFactory.ArrowExpressionClause(
+                    SyntaxFactory.ParseExpression(
+                        $"{tool.Name.Pascalize()}({string.Join(", ", tool.Parameters.Select(p => $"param.{p.Name.Pascalize()}"))}" +
+                        (
+                            _protocol.ContextType == null
+                                ? ""
+                                : ", " + $"({ResolveType(_protocol.ContextType)})context"
+                        ) + ")")
+                ))
+                .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
+            if (_protocol.ContextType != null)
+                method = method.AddParameterListParameters(SyntaxFactory.Parameter(SyntaxFactory.Identifier("context"))
+                    .WithType(ResolveType(_protocol.ContextType)));
+            return method;
+        }
+
+        private MethodDeclarationSyntax GenerateToolProtectedMethod(ProtocolTool tool)
+        {
+            var method = SyntaxFactory.MethodDeclaration(SyntaxFactory
+                        .GenericName(SyntaxFactory.Identifier("Task"))
+                        .AddTypeArgumentListArguments(ResolveType(tool.ResultType)),
+                    tool.Name.Pascalize())
+                .AddModifiers(
+                    SyntaxFactory.Token(SyntaxKind.ProtectedKeyword),
+                    SyntaxFactory.Token(SyntaxKind.AbstractKeyword)
+                )
+                .AddParameterListParameters(tool.Parameters.Select(parameter => SyntaxFactory
+                        .Parameter(SyntaxFactory.Identifier(parameter.Name))
+                        .WithType(ResolveType(parameter.Type))
+                    ).ToArray()
+                )
+                .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
+            if (_protocol.ContextType != null)
+                method = method.AddParameterListParameters(SyntaxFactory.Parameter(SyntaxFactory.Identifier("context"))
+                    .WithType(ResolveType(_protocol.ContextType)));
+            return method;
         }
 
         private ClassDeclarationSyntax GenerateModelClass(ProtocolCustomType customType)

@@ -25,33 +25,33 @@ public class Client
 
     private const string Url = "/api/v1/openai/request";
 
-    private record Function(string Name, Func<string, Task<object?>> Func, AiTool ToolDefinition);
+    private record Function(string Name, Func<string, object?, Task<object?>> Func, AiTool ToolDefinition);
 
     private readonly List<Function> _functions = [];
 
-    public async Task<string?> SendTextRequestAsync<TIn>(string prompt, TIn request, string? model = null,
-        Action<ToolCallbackArgs>? onToolCalled = null)
+    public async Task<string?> SendTextRequestAsync<TIn>(string prompt, TIn request, object? context,
+        RequestOptions? options = null)
     {
-        var resp = await SendRequestAsync(prompt, request, model, onToolCalled);
+        var resp = await SendRequestAsync(prompt, request, context, options);
         return resp == null ? null : ProcessTextResult(resp);
     }
 
-    public async Task<TOut?> SendJsonRequestAsync<TIn, TOut>(string prompt, TIn request, string? model = null,
-        Action<ToolCallbackArgs>? onToolCalled = null)
+    public async Task<TOut?> SendJsonRequestAsync<TIn, TOut>(string prompt, TIn request, object? context,
+        RequestOptions? options = null)
     {
-        var resp = await SendRequestAsync(prompt, request, model, onToolCalled);
+        var resp = await SendRequestAsync(prompt, request, context, options);
         return resp == null ? default : ProcessJsonResult<TOut>(resp);
     }
 
-    public async Task<string?> SendCodeRequestAsync<TIn>(string prompt, TIn request, string? model = null,
-        Action<ToolCallbackArgs>? onToolCalled = null)
+    public async Task<string?> SendCodeRequestAsync<TIn>(string prompt, TIn request, object? context,
+        RequestOptions? options = null)
     {
-        var resp = await SendRequestAsync(prompt, request, model, onToolCalled);
+        var resp = await SendRequestAsync(prompt, request, context, options);
         return resp == null ? null : ProcessCodeResult(resp);
     }
 
-    private async Task<string?> SendRequestAsync<TIn>(string prompt, TIn request, string? model = null,
-        Action<ToolCallbackArgs>? onToolCalled = null)
+    private async Task<string?> SendRequestAsync<TIn>(string prompt, TIn request, object? context,
+        RequestOptions? options = null)
     {
         var resp = await SendInitAsync(prompt, request);
         for (int i = 0; i < MaxToolCalls; i++)
@@ -73,9 +73,9 @@ public class Client
 
                     resp = await SendAsync(new AiRequestModel
                     {
-                        Messages = messages.Concat(await CallToolsAsync(lastMessage, onToolCalled)).ToArray(),
+                        Messages = messages.Concat(await CallToolsAsync(lastMessage, context, options?.OnToolCalled)).ToArray(),
                         Tools = _functions.Select(f => f.ToolDefinition).ToArray(),
-                        Model = model ?? BaseModel,
+                        Model = options?.Model ?? BaseModel,
                     });
                     break;
                 }
@@ -171,7 +171,8 @@ public class Client
         return result;
     }
 
-    private async Task<List<AiMessage>> CallToolsAsync(AiMessage message, Action<ToolCallbackArgs>? onToolCalled = null)
+    private async Task<List<AiMessage>> CallToolsAsync(AiMessage message, object? context,
+        Action<ToolCallbackArgs>? onToolCalled = null)
     {
         var messages = new List<AiMessage>();
         if (message.ToolCalls == null)
@@ -184,7 +185,7 @@ public class Client
             Exception? exception = null;
             try
             {
-                res = await function.Func(toolCall.Arguments);
+                res = await function.Func(toolCall.Arguments, context);
             }
             catch (Exception e)
             {
@@ -214,9 +215,27 @@ public class Client
         return messages;
     }
 
+    public void AddFunction<TIn, TOut>(string name, Func<TIn?, object?, Task<TOut>> func, AiTool toolDefinition)
+    {
+        _functions.Add(new Function(name, async (data, context) =>
+        {
+            var param = JsonSerializer.Deserialize<TIn>(data);
+            return await func(param, context);
+        }, toolDefinition));
+    }
+
+    public void AddFunction<TIn, TContext, TOut>(string name, Func<TIn?, TContext?, Task<TOut>> func, AiTool toolDefinition)
+    {
+        _functions.Add(new Function(name, async (data, context) =>
+        {
+            var param = JsonSerializer.Deserialize<TIn>(data);
+            return await func(param, (TContext?)context);
+        }, toolDefinition));
+    }
+
     public void AddFunction<TIn, TOut>(string name, Func<TIn?, Task<TOut>> func, AiTool toolDefinition)
     {
-        _functions.Add(new Function(name, async data =>
+        _functions.Add(new Function(name, async (data, _) =>
         {
             var param = JsonSerializer.Deserialize<TIn>(data);
             return await func(param);
