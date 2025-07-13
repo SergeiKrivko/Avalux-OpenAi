@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Avalux.OpenAi.Protocol.Models
 {
@@ -16,5 +17,6 @@ namespace Avalux.OpenAi.Protocol.Models
         public string Format { get; set; } = string.Empty;
 
         [JsonPropertyName("required")] public bool Required { get; set; }
+        [JsonPropertyName("properties")] public Dictionary<string, ApiToolParameter> Properties { get; set; }
     }
 }
