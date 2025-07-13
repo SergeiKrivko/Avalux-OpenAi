@@ -1,4 +1,6 @@
-﻿namespace Avalux.OpenAi.Protocol.Models
+﻿using System;
+
+namespace Avalux.OpenAi.Protocol.Models
 {
     public class ProtocolEndpoint
     {
@@ -6,6 +8,8 @@
         public IProtocolType InputType { get; set; }
         public IProtocolType OutputType { get; set; }
         public ProtocolEndpointMode Mode { get; set; }
+
+        public string[] Prompts { get; set; } = Array.Empty<string>();
 
         public string ProcessPrompt(string source)
         {
