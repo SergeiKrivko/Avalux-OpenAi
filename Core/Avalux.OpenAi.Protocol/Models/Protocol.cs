@@ -19,6 +19,8 @@ namespace Avalux.OpenAi.Protocol.Models
 
         public IProtocolType ResolveType(string type)
         {
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
             if (type.EndsWith("?"))
                 return new ProtocolNullableType(ResolveType(type.Substring(0, type.Length - 1)));
             if (type.EndsWith("[]"))

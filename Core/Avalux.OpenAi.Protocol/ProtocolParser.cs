@@ -19,6 +19,7 @@ namespace Avalux.OpenAi.Protocol
             var yaml = File.ReadAllText(filePath);
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                .IgnoreUnmatchedProperties()
                 .Build();
             var obj = deserializer.Deserialize<ProtocolVersionSchema>(yaml);
             return obj.Version;

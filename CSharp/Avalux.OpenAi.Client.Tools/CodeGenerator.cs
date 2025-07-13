@@ -204,8 +204,20 @@ namespace Avalux.OpenAi.Client.Tools
             if (endpoint.Mode == ProtocolEndpointMode.Json)
                 typeParam += ", " + ResolveType(endpoint.OutputType);
             typeParam += ">";
+
+            var prompts = endpoint.Prompts.Any()
+                ? endpoint.Prompts.Select(p =>
+                    SymbolDisplay.FormatLiteral(endpoint.ProcessPrompt(File.ReadAllText(Path.Combine(_projectPath, p))),
+                        true))
+                : new[]
+                {
+                    SymbolDisplay.FormatLiteral(
+                        endpoint.ProcessPrompt(File.ReadAllText(Path.Combine(_projectPath, "Prompts",
+                            endpoint.Name.Pascalize() + ".prompt.txt"))), true)
+                };
+
             var res =
-                $"await _client.Send{endpoint.Mode}RequestAsync{typeParam}({SymbolDisplay.FormatLiteral(endpoint.ProcessPrompt(File.ReadAllText(Path.Combine(_projectPath, "Prompts", endpoint.Name.Pascalize() + ".prompt.txt"))), true)}";
+                $"await _client.Send{endpoint.Mode}RequestAsync{typeParam}([{string.Join(", ", prompts)}]";
             res += ", param";
             if (_protocol.ContextType != null)
                 res += ", context";
@@ -353,7 +365,7 @@ namespace Avalux.OpenAi.Client.Tools
         public void GeneratePromptFiles(string projectPath)
         {
             Directory.CreateDirectory(Path.Combine(projectPath, "Prompts"));
-            foreach (var endpoint in _protocol.Endpoints)
+            foreach (var endpoint in _protocol.Endpoints.Where(e => !e.Prompts.Any()))
             {
                 var file = Path.Combine(projectPath, "Prompts", endpoint.Name.Pascalize() + ".prompt.txt");
                 if (!File.Exists(file))
