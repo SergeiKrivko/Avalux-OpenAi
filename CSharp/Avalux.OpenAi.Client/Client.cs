@@ -29,31 +29,40 @@ public class Client
 
     private readonly List<Function> _functions = [];
 
-    public async Task<string?> SendTextRequestAsync<TIn>(string prompt, TIn request, object? context,
+    public Task<string?> SendTextRequestAsync<TIn>(string prompt, TIn request, object? context,
+        RequestOptions? options = null) => SendTextRequestAsync([prompt], request, context, options);
+
+    public async Task<string?> SendTextRequestAsync<TIn>(string[] prompt, TIn request, object? context,
         RequestOptions? options = null)
     {
         var resp = await SendRequestAsync(prompt, request, context, options);
         return resp == null ? null : ProcessTextResult(resp);
     }
 
-    public async Task<TOut?> SendJsonRequestAsync<TIn, TOut>(string prompt, TIn request, object? context,
+    public Task<TOut?> SendJsonRequestAsync<TIn, TOut>(string prompt, TIn request, object? context,
+        RequestOptions? options = null) => SendJsonRequestAsync<TIn, TOut>([prompt], request, context, options);
+
+    public async Task<TOut?> SendJsonRequestAsync<TIn, TOut>(string[] prompt, TIn request, object? context,
         RequestOptions? options = null)
     {
         var resp = await SendRequestAsync(prompt, request, context, options);
         return resp == null ? default : ProcessJsonResult<TOut>(resp);
     }
 
-    public async Task<string?> SendCodeRequestAsync<TIn>(string prompt, TIn request, object? context,
+    public Task<string?> SendCodeRequestAsync<TIn>(string prompt, TIn request, object? context,
+        RequestOptions? options = null) => SendCodeRequestAsync([prompt], request, context, options);
+
+    public async Task<string?> SendCodeRequestAsync<TIn>(string[] prompt, TIn request, object? context,
         RequestOptions? options = null)
     {
         var resp = await SendRequestAsync(prompt, request, context, options);
         return resp == null ? null : ProcessCodeResult(resp);
     }
 
-    private async Task<string?> SendRequestAsync<TIn>(string prompt, TIn request, object? context,
+    private async Task<string?> SendRequestAsync<TIn>(string[] prompts, TIn request, object? context,
         RequestOptions? options = null)
     {
-        var resp = await SendInitAsync(prompt, request);
+        var resp = await SendInitAsync(prompts, request);
         for (int i = 0; i < MaxToolCalls; i++)
         {
             var retry = 0;
@@ -73,7 +82,8 @@ public class Client
 
                     resp = await SendAsync(new AiRequestModel
                     {
-                        Messages = messages.Concat(await CallToolsAsync(lastMessage, context, options?.OnToolCalled)).ToArray(),
+                        Messages = messages.Concat(await CallToolsAsync(lastMessage, context, options?.OnToolCalled))
+                            .ToArray(),
                         Tools = _functions.Select(f => f.ToolDefinition).ToArray(),
                         Model = options?.Model ?? BaseModel,
                     });
@@ -136,23 +146,21 @@ public class Client
         return result;
     }
 
-    private async Task<AiResponseModel> SendInitAsync<TIn>(string prompt, TIn request, string? model = null)
+    private async Task<AiResponseModel> SendInitAsync<TIn>(string[] prompts, TIn request, string? model = null)
     {
         var content = JsonContent.Create(new AiRequestModel
         {
-            Messages =
-            [
-                new AiMessage
-                {
-                    Role = "system",
-                    Content = prompt,
-                },
+            Messages = prompts.Select(prompt => new AiMessage
+            {
+                Role = "system",
+                Content = prompt,
+            }).Concat([
                 new AiMessage
                 {
                     Role = "user",
                     Content = JsonSerializer.Serialize(request)
                 },
-            ],
+            ]).ToArray(),
             Tools = _functions.Select(f => f.ToolDefinition).ToArray(),
             Model = model ?? BaseModel,
         }, options: new JsonSerializerOptions
@@ -224,7 +232,8 @@ public class Client
         }, toolDefinition));
     }
 
-    public void AddFunction<TIn, TContext, TOut>(string name, Func<TIn?, TContext?, Task<TOut>> func, AiTool toolDefinition)
+    public void AddFunction<TIn, TContext, TOut>(string name, Func<TIn?, TContext?, Task<TOut>> func,
+        AiTool toolDefinition)
     {
         _functions.Add(new Function(name, async (data, context) =>
         {
