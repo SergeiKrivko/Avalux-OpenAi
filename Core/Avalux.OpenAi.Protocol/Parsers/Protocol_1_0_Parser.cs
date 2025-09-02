@@ -46,8 +46,6 @@ namespace Avalux.OpenAi.Protocol.Parsers
                 protocol.Endpoints.Add(ParseEndpoint(item.Key, item.Value, protocol));
             }
 
-            ParseContextType(apiSchema, protocol);
-
             return protocol;
         }
 
@@ -105,12 +103,6 @@ namespace Avalux.OpenAi.Protocol.Parsers
                 throw new Exception("'code' mode requires a 'string' output type");
 
             return result;
-        }
-
-        protected virtual void ParseContextType(ApiSchema apiSchema, Models.Protocol protocol)
-        {
-            if (!string.IsNullOrWhiteSpace(apiSchema.Context))
-                protocol.ContextType = protocol.ResolveType(apiSchema.Context);
         }
     }
 }
