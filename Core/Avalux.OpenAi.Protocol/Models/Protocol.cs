@@ -31,7 +31,5 @@ namespace Avalux.OpenAi.Protocol.Models
                 return result;
             throw new Exception($"Unknown type: {type}");
         }
-
-        public IProtocolType ContextType { get; set; }
     }
 }
