@@ -2,7 +2,7 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <PackageId>Avalux.OpenAi.Client.Tools</PackageId>
-        <PackageVersion>1.1.3</PackageVersion>
+        <PackageVersion>1.1.7</PackageVersion>
 
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>

@@ -250,7 +250,7 @@ namespace Avalux.OpenAi.Client.Tools
                 )
                 .WithExpressionBody(SyntaxFactory.ArrowExpressionClause(
                     SyntaxFactory.ParseExpression(
-                        $"{tool.Name.Pascalize()}({string.Join(", ", tool.Parameters.Select(p => $"param.{p.Name.Pascalize()}"))}, context)")
+                        $"{tool.Name.Pascalize()}({string.Join(" ", tool.Parameters.Select(p => $"param.{p.Name.Pascalize()},"))} context)")
                 ))
                 .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
             return method;
