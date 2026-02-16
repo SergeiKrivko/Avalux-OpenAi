@@ -1,6 +1,8 @@
 ﻿using System.Net.Http.Json;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Unicode;
 using Avalux.OpenAi.Client.Models;
 
 namespace Avalux.OpenAi.Client;
@@ -22,6 +24,11 @@ public class Client
 
     public int MaxToolCalls { get; set; } = 100;
     public int MaxRetries { get; set; } = 3;
+
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+    };
 
     private const string Url = "/api/v1/openai/request";
 
@@ -158,7 +165,7 @@ public class Client
                 new AiMessage
                 {
                     Role = "user",
-                    Content = JsonSerializer.Serialize(request)
+                    Content = JsonSerializer.Serialize(request, _jsonSerializerOptions)
                 },
             ]).ToArray(),
             Tools = _functions.Select(f => f.ToolDefinition).ToArray(),
@@ -215,7 +222,7 @@ public class Client
             messages.Add(new AiMessage
             {
                 Role = "tool",
-                Content = JsonSerializer.Serialize(res),
+                Content = JsonSerializer.Serialize(res, _jsonSerializerOptions),
                 ToolCallId = toolCall.Id,
             });
         }
