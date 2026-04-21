@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
+using System.Text.Json;
 using Avalux.OpenAi.Protocol.Models;
 
 namespace Avalux.OpenAi.Client.Tools
@@ -36,6 +37,7 @@ namespace Avalux.OpenAi.Client.Tools
         }
 
         private string ClientInterfaceName => $"I{_protocol.Name.Pascalize()}Client";
+        private string ClientInterfaceFullName => $"I{_protocol.Name.Pascalize()}Client<TContext>";
         private string ClientAbstractClassName => $"{_protocol.Name.Pascalize()}ClientBase";
 
         private TypeSyntax ResolveType(IProtocolType protocolType)
@@ -68,7 +70,7 @@ namespace Avalux.OpenAi.Client.Tools
                     }
 
                 case ProtocolCustomType customType:
-                    return SyntaxFactory.ParseTypeName(ClientInterfaceName + "." + customType.Name);
+                    return SyntaxFactory.ParseTypeName(ClientInterfaceFullName + "." + customType.Name);
 
                 case ProtocolNullableType nullableType:
                     return SyntaxFactory.NullableType(ResolveType(nullableType.InnerType));
@@ -89,7 +91,8 @@ namespace Avalux.OpenAi.Client.Tools
         {
             var interfaceDeclaration =
                 SyntaxFactory.InterfaceDeclaration(SyntaxFactory.Identifier(ClientInterfaceName))
-                    .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
+                    .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+                    .AddTypeParameterListParameters(SyntaxFactory.TypeParameter("TContext"));
 
             foreach (var protocolEndpoint in _protocol.Endpoints)
             {
@@ -125,29 +128,31 @@ namespace Avalux.OpenAi.Client.Tools
                     .AddConstraintClauses(SyntaxFactory.TypeParameterConstraintClause("TContext")
                         .AddConstraints(SyntaxFactory.ClassOrStructConstraint(SyntaxKind.ClassConstraint)))
                     .AddBaseListTypes(
-                        SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName(ClientInterfaceName))
+                        SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName(ClientInterfaceFullName))
                     )
                     .AddMembers(
                         SyntaxFactory.ParseMemberDeclaration(
-                            $"protected {_protocol.Name.Pascalize()}ClientBase(Uri apiUri, string? model = null)\n" +
+                            $"protected {_protocol.Name.Pascalize()}ClientBase(Uri apiUri, string apiKey, string model)\n" +
                             "{\n" +
-                            "    _client = new Avalux.OpenAi.Client.Client(new HttpClient { BaseAddress = apiUri }) { BaseModel = model ?? \"auto\" };\n" +
+                            "    _client = new global::Avalux.OpenAi.Client.OpenAiClient<TContext>(new global::Avalux.OpenAi.Client.Models.OpenAiClientOptions { ApiEndpoint = apiUri, ApiKey = apiKey, Model = model });\n" +
                             "    _Initialize();\n" +
                             "}") ?? throw new Exception("Internal error"),
                         SyntaxFactory.ParseMemberDeclaration(
-                            $"protected {_protocol.Name.Pascalize()}ClientBase(HttpClient httpClient, string? model = null)\n" +
+                            $"protected {_protocol.Name.Pascalize()}ClientBase(global::Avalux.OpenAi.Client.OpenAiClient<TContext> client)\n" +
                             "{\n" +
-                            "    _client = new Avalux.OpenAi.Client.Client(httpClient) { BaseModel = model ?? \"auto\" };\n" +
+                            "    _client = client;\n" +
                             "    _Initialize();\n" +
                             "}") ?? throw new Exception("Internal error"),
                         SyntaxFactory.ParseMemberDeclaration(
                             "private void _Initialize()\n" +
                             "{\n" +
-                            $"    {string.Join("\n", _protocol.Tools.Select(tool => $"_client.AddFunction<{tool.Name.Pascalize()}Request, TContext, {ResolveType(tool.ResultType).ToFullString()}>(\"{tool.Name}\", _{tool.Name.Pascalize()}, global::System.Text.Json.JsonSerializer.Deserialize<global::Avalux.OpenAi.Client.Models.AiTool>({SymbolDisplay.FormatLiteral(tool.GenerateJsonDefinition(), true)})!);"))}\n" +
+                            $"    {string.Join("\n", _protocol.Tools.Select(tool => $"_client.AddFunction<{tool.Name.Pascalize()}Request, {ResolveType(tool.ResultType).ToFullString()}>(\"{tool.Name}\", {SymbolDisplay.FormatLiteral(tool.Description, true)}, _{tool.Name.Pascalize()}, new global::System.BinaryData({SymbolDisplay.FormatLiteral(JsonSerializer.Serialize(tool.ToTypeSchema()), true)}));"))}\n" +
                             "}") ?? throw new Exception("Internal error"),
                         SyntaxFactory.FieldDeclaration(
                                 SyntaxFactory
-                                    .VariableDeclaration(SyntaxFactory.ParseTypeName("Avalux.OpenAi.Client.Client"))
+                                    .VariableDeclaration(
+                                        SyntaxFactory.ParseTypeName(
+                                            "global::Avalux.OpenAi.Client.OpenAiClient<TContext>"))
                                     .WithVariables(SyntaxFactory.SeparatedList(new[]
                                         { SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier("_client")) })))
                             .AddModifiers(
@@ -157,7 +162,8 @@ namespace Avalux.OpenAi.Client.Tools
                     )
                     .AddMembers(_protocol.Endpoints
                         .Select(endpoint =>
-                            SyntaxFactory.MethodDeclaration(SyntaxFactory.GenericName(SyntaxFactory.Identifier("global::System.Threading.Tasks.Task"))
+                            SyntaxFactory.MethodDeclaration(SyntaxFactory
+                                        .GenericName(SyntaxFactory.Identifier("global::System.Threading.Tasks.Task"))
                                         .AddTypeArgumentListArguments(
                                             SyntaxFactory.NullableType(ResolveType(endpoint.OutputType))),
                                     endpoint.Name.Pascalize())
@@ -166,11 +172,9 @@ namespace Avalux.OpenAi.Client.Tools
                                 )
                                 .WithExplicitInterfaceSpecifier(
                                     SyntaxFactory.ExplicitInterfaceSpecifier(
-                                        SyntaxFactory.IdentifierName(ClientInterfaceName)))
+                                        SyntaxFactory.IdentifierName(ClientInterfaceFullName)))
                                 .AddParameterListParameters(GenerateEndpointMethodParameters(endpoint))
-                                .WithExpressionBody(SyntaxFactory.ArrowExpressionClause(
-                                    SyntaxFactory.ParseExpression(GetEndpointExpression(endpoint))))
-                                .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
+                                .WithBody(GetEndpointExpression(endpoint))
                         )
                         .Cast<MemberDeclarationSyntax>()
                         .ToArray()
@@ -195,13 +199,8 @@ namespace Avalux.OpenAi.Client.Tools
             return classDeclaration;
         }
 
-        private string GetEndpointExpression(ProtocolEndpoint endpoint)
+        private BlockSyntax GetEndpointExpression(ProtocolEndpoint endpoint)
         {
-            var typeParam = "<" + ResolveType(endpoint.InputType).ToFullString();
-            if (endpoint.Mode == ProtocolEndpointMode.Json)
-                typeParam += ", " + ResolveType(endpoint.OutputType);
-            typeParam += ">";
-
             var prompts = endpoint.Prompts.Any()
                 ? endpoint.Prompts.Select(p =>
                     SymbolDisplay.FormatLiteral(endpoint.ProcessPrompt(File.ReadAllText(Path.Combine(_projectPath, p))),
@@ -213,9 +212,30 @@ namespace Avalux.OpenAi.Client.Tools
                             endpoint.Name.Pascalize() + ".prompt.txt"))), true)
                 };
 
-            var res =
-                $"await _client.Send{endpoint.Mode}RequestAsync{typeParam}([{string.Join(", ", prompts)}], param, context as TContext, options)";
-            return res;
+            var block = SyntaxFactory.Block(
+                SyntaxFactory.ParseStatement(
+                    "var response = await _client.CompleteAsync(new global::Avalux.OpenAi.Client.Models.ChatRequest()" +
+                    $"{string.Join("", prompts.Select(e => $".AddSystemPrompt({SymbolDisplay.FormatLiteral(e, true)})"))}" +
+                    ".AddUserMessage(param)" +
+                    (endpoint.Mode == ProtocolEndpointMode.Json
+                        ? $".SetResponseType(\"{ResolveType(endpoint.OutputType).ToFullString()}\", new global::System.BinaryData({SymbolDisplay.FormatLiteral(JsonSerializer.Serialize(endpoint.OutputType.ToTypeSchema()), true)}))"
+                        : "") + ", context);")
+            );
+            switch (endpoint.Mode)
+            {
+                case ProtocolEndpointMode.Text:
+                    block = block.AddStatements(SyntaxFactory.ParseStatement("return response.ReadAsString();"));
+                    break;
+                case ProtocolEndpointMode.Json:
+                    block = block.AddStatements(SyntaxFactory.ParseStatement(
+                        $"return response.ReadAsJson<{ResolveType(endpoint.OutputType).ToFullString()}>();"));
+                    break;
+                case ProtocolEndpointMode.Code:
+                    block = block.AddStatements(SyntaxFactory.ParseStatement("return response.ReadAsCode();"));
+                    break;
+            }
+
+            return block;
         }
 
         private ParameterSyntax[] GenerateEndpointMethodParameters(ProtocolEndpoint endpoint)
@@ -224,12 +244,12 @@ namespace Avalux.OpenAi.Client.Tools
             res.Add(SyntaxFactory.Parameter(SyntaxFactory.Identifier("param"))
                 .WithType(ResolveType(endpoint.InputType)));
             res.Add(SyntaxFactory.Parameter(SyntaxFactory.Identifier("context"))
-                .WithType(SyntaxFactory.ParseTypeName("object?"))
-                .WithDefault(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseExpression("null"))));
+                .WithType(SyntaxFactory.ParseTypeName("TContext?"))
+                .WithDefault(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseExpression("default"))));
 
-            res.Add(SyntaxFactory.Parameter(SyntaxFactory.Identifier("options"))
-                .WithType(SyntaxFactory.ParseTypeName("global::Avalux.OpenAi.Client.Models.RequestOptions?"))
-                .WithDefault(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseExpression("null"))));
+            // res.Add(SyntaxFactory.Parameter(SyntaxFactory.Identifier("options"))
+            //     .WithType(SyntaxFactory.ParseTypeName("global::Avalux.OpenAi.Client.Models.RequestOptions?"))
+            //     .WithDefault(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseExpression("null"))));
             return res.ToArray();
         }
 
@@ -250,7 +270,7 @@ namespace Avalux.OpenAi.Client.Tools
                 )
                 .WithExpressionBody(SyntaxFactory.ArrowExpressionClause(
                     SyntaxFactory.ParseExpression(
-                        $"{tool.Name.Pascalize()}({string.Join(", ", tool.Parameters.Select(p => $"param.{p.Name.Pascalize()}"))}, context)")
+                        $"{tool.Name.Pascalize()}({string.Join(", ", tool.Parameters.Select(p => $"param.{p.Name.Pascalize()}").Concat(new[] { "context" }))})")
                 ))
                 .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
             return method;

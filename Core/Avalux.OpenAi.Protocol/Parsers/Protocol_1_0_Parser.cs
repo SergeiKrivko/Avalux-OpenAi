@@ -60,13 +60,15 @@ namespace Avalux.OpenAi.Protocol.Parsers
             {
                 Name = name,
                 Description = toolSchema.Description,
-                Parameters = toolSchema.Params.Select(p => new ProtocolToolParameter
-                {
-                    Name = p.Name,
-                    Description = p.Description,
-                    Type = protocol.ResolveType(p.Type),
-                    Example = p.Example,
-                }).ToArray(),
+                Parameters = toolSchema.Params == null
+                    ? Array.Empty<ProtocolToolParameter>()
+                    : toolSchema.Params.Select(p => new ProtocolToolParameter
+                    {
+                        Name = p.Name,
+                        Description = p.Description,
+                        Type = protocol.ResolveType(p.Type),
+                        Example = p.Example,
+                    }).ToArray(),
                 ResultType = protocol.ResolveType(toolSchema.Result)
             };
         }
