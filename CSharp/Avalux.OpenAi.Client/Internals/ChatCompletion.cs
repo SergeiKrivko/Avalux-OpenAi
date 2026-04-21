@@ -2,16 +2,11 @@
 
 namespace Avalux.OpenAi.Client.Internals;
 
-internal class ChatCompletion(OpenAI.Chat.ChatCompletion completion) : IChatCompletion
+internal class ChatCompletion(OpenAI.Chat.ChatCompletion completion, ChatCompletionUsage? usage = null) : IChatCompletion
 {
     public string Content => completion.Content[0].Text;
 
-    public IChatCompletionUsage Usage { get; } = new ChatCompletionUsage
-    {
-        InputTokens = completion.Usage.InputTokenCount,
-        OutputTokens = completion.Usage.OutputTokenCount,
-        TotalTokens = completion.Usage.TotalTokenCount,
-    };
+    public IChatCompletionUsage Usage { get; } = usage ?? new ChatCompletionUsage(completion.Usage);
 
     public string ReadAsString()
     {

@@ -17,4 +17,5 @@ public interface IChatCompletionUsage
     public int InputTokens { get; }
     public int OutputTokens { get; }
     public int TotalTokens { get; }
+    public int TotalRequests { get; }
 }

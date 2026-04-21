@@ -1,5 +1,4 @@
 ﻿using System.ClientModel;
-using System.Text.Json;
 using Avalux.OpenAi.Client.Internals;
 using Avalux.OpenAi.Client.Models;
 using OpenAI;
@@ -28,6 +27,7 @@ public class OpenAiClient<TContext>(OpenAiClientOptions options) : IOpenAiClient
             foreach (var tool in _tools.Values)
                 request.Options.Tools.Add(tool.Tool);
         var response = await _client.CompleteChatAsync(messages, request.Options, ct);
+        var usage = new ChatCompletionUsage(response.Value.Usage);
         while (response.Value.FinishReason == ChatFinishReason.FunctionCall ||
                response.Value.FinishReason == ChatFinishReason.ToolCalls)
         {
@@ -40,11 +40,11 @@ public class OpenAiClient<TContext>(OpenAiClientOptions options) : IOpenAiClient
             }
 
             response = await _client.CompleteChatAsync(messages, request.Options, ct);
+            usage.Add(new ChatCompletionUsage(response.Value.Usage));
         }
 
-        var completion =  new ChatCompletion(response.Value);
-        _usage.Add(completion.Usage);
-        return completion;
+        _usage.Add(usage);
+        return new ChatCompletion(response.Value, usage);
     }
 
     public async Task<IChatCompletion> CompleteAsync(ChatRequest request, TContext context,
@@ -55,6 +55,7 @@ public class OpenAiClient<TContext>(OpenAiClientOptions options) : IOpenAiClient
             foreach (var tool in _tools.Values)
                 request.Options.Tools.Add(tool.Tool);
         var response = await _client.CompleteChatAsync(messages, request.Options, ct);
+        var usage = new ChatCompletionUsage(response.Value.Usage);
         while (response.Value.FinishReason == ChatFinishReason.FunctionCall ||
                response.Value.FinishReason == ChatFinishReason.ToolCalls)
         {
@@ -67,11 +68,11 @@ public class OpenAiClient<TContext>(OpenAiClientOptions options) : IOpenAiClient
             }
 
             response = await _client.CompleteChatAsync(messages, request.Options, ct);
+            usage.Add(new ChatCompletionUsage(response.Value.Usage));
         }
 
-        var completion =  new ChatCompletion(response.Value);
-        _usage.Add(completion.Usage);
-        return completion;
+        _usage.Add(usage);
+        return new ChatCompletion(response.Value, usage);
     }
 
     public void AddFunction<TIn, TOut>(string name, string? description, Func<TIn, Task<TOut>> func)
@@ -103,28 +104,32 @@ public class OpenAiClient<TContext>(OpenAiClientOptions options) : IOpenAiClient
             func));
     }
 
-    public void AddFunction<TIn, TOut>(string name, string? description, Func<TIn, Task<TOut>> func, BinaryData paramSchema)
+    public void AddFunction<TIn, TOut>(string name, string? description, Func<TIn, Task<TOut>> func,
+        BinaryData paramSchema)
     {
         _tools.Add(name, new OpenAiTool<TIn, TContext, TOut>(
             ChatTool.CreateFunctionTool(name, description, paramSchema),
             (@in, _, _) => func(@in)));
     }
 
-    public void AddFunction<TIn, TOut>(string name, string? description, Func<TIn, CancellationToken, Task<TOut>> func, BinaryData paramSchema)
+    public void AddFunction<TIn, TOut>(string name, string? description, Func<TIn, CancellationToken, Task<TOut>> func,
+        BinaryData paramSchema)
     {
         _tools.Add(name, new OpenAiTool<TIn, TContext, TOut>(
             ChatTool.CreateFunctionTool(name, description, paramSchema),
             (@in, _, ct) => func(@in, ct)));
     }
 
-    public void AddFunction<TIn, TOut>(string name, string? description, Func<TIn, TContext?, Task<TOut>> func, BinaryData paramSchema)
+    public void AddFunction<TIn, TOut>(string name, string? description, Func<TIn, TContext?, Task<TOut>> func,
+        BinaryData paramSchema)
     {
         _tools.Add(name, new OpenAiTool<TIn, TContext, TOut>(
             ChatTool.CreateFunctionTool(name, description, paramSchema),
             (@in, context, _) => func(@in, context)));
     }
 
-    public void AddFunction<TIn, TOut>(string name, string? description, Func<TIn, TContext?, CancellationToken, Task<TOut>> func, BinaryData paramSchema)
+    public void AddFunction<TIn, TOut>(string name, string? description,
+        Func<TIn, TContext?, CancellationToken, Task<TOut>> func, BinaryData paramSchema)
     {
         _tools.Add(name, new OpenAiTool<TIn, TContext, TOut>(
             ChatTool.CreateFunctionTool(name, description, paramSchema),
