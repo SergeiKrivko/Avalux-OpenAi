@@ -92,7 +92,10 @@ namespace Avalux.OpenAi.Client.Tools
             var interfaceDeclaration =
                 SyntaxFactory.InterfaceDeclaration(SyntaxFactory.Identifier(ClientInterfaceName))
                     .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-                    .AddTypeParameterListParameters(SyntaxFactory.TypeParameter("TContext"));
+                    .AddTypeParameterListParameters(SyntaxFactory.TypeParameter("TContext"))
+                    .AddBaseListTypes(
+                        SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName("global::System.IAsyncDisposable"))
+                    );
 
             foreach (var protocolEndpoint in _protocol.Endpoints)
             {
@@ -158,7 +161,10 @@ namespace Avalux.OpenAi.Client.Tools
                             .AddModifiers(
                                 SyntaxFactory.Token(SyntaxKind.PrivateKeyword),
                                 SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword)
-                            )
+                            ),
+                        SyntaxFactory.ParseMemberDeclaration(
+                            "public virtual ValueTask DisposeAsync() => ValueTask.CompletedTask;") ??
+                        throw new Exception("Internal error")
                     )
                     .AddMembers(_protocol.Endpoints
                         .Select(endpoint =>
