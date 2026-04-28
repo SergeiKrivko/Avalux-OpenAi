@@ -5,7 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageId>Avalux.OpenAi.Client</PackageId>
-        <PackageVersion>2.1.8</PackageVersion>
+        <PackageVersion>2.1.9</PackageVersion>
 
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>

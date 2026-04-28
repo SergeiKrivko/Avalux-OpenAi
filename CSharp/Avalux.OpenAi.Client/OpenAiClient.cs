@@ -22,6 +22,7 @@ public class OpenAiClient<TContext>(OpenAiClientOptions options) : IOpenAiClient
     {
         Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
         PropertyNameCaseInsensitive = false,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 
     private readonly ChatCompletionUsage _usage = new();
