@@ -15,6 +15,7 @@ public class ChatRequest
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
         Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+        PropertyNameCaseInsensitive = false,
     };
 
     public ChatRequest AddSystemPrompt(string content)
