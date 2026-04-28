@@ -49,6 +49,21 @@ internal static class TypeParser
                 };
         }
 
+        if (type.IsAssignableTo(typeof(Guid)))
+            return new TypeSchema
+            {
+                Type = "string",
+                Format = "uuid",
+                Description = description,
+            };
+        if (type.IsAssignableTo(typeof(DateTime)))
+            return new TypeSchema
+            {
+                Type = "string",
+                Format = "datetime",
+                Description = description,
+            };
+
         if (type.IsArray)
         {
             return new TypeSchema
@@ -58,6 +73,7 @@ internal static class TypeParser
                 Description = description,
             };
         }
+
         if (type.IsAssignableTo(typeof(IEnumerable)))
         {
             return new TypeSchema

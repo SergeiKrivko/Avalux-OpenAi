@@ -6,6 +6,8 @@ public class TypeSchema
 {
     [JsonPropertyName("type")] public required string Type { get; init; }
 
+    [JsonPropertyName("format")] public string? Format { get; init; }
+
     [JsonPropertyName("properties")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Dictionary<string, TypeSchema>? Properties { get; init; }
