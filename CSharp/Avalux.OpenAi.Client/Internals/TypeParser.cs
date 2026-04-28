@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections;
+using System.ComponentModel;
 using System.Reflection;
 using Avalux.OpenAi.Client.Models;
 
@@ -48,7 +49,7 @@ internal static class TypeParser
                 };
         }
 
-        if (type.IsAssignableTo(typeof(IEnumerable<>)))
+        if (type.IsAssignableTo(typeof(IEnumerable)))
         {
             return new TypeSchema
             {
