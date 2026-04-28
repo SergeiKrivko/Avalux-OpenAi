@@ -54,7 +54,7 @@ internal static class TypeParser
             return new TypeSchema
             {
                 Type = "array",
-                ItemsType = type.GenericTypeArguments.First().ToSchema(),
+                ItemsType = type.GenericTypeArguments[0].ToSchema(),
                 Description = description,
             };
         }
