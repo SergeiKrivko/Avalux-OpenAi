@@ -35,6 +35,18 @@ public class ChatRequest
         return this;
     }
 
+    public ChatRequest AddUserMessage(IEnumerable<ChatMessageContentPart> parts)
+    {
+        Messages.Add(new UserChatMessage(parts));
+        return this;
+    }
+
+    public ChatRequest AddUserMessage(params ChatMessageContentPart[] parts)
+    {
+        Messages.Add(new UserChatMessage(parts));
+        return this;
+    }
+
     public ChatRequest AddAssistantMessage(string content)
     {
         Messages.Add(new AssistantChatMessage(content));
@@ -44,6 +56,18 @@ public class ChatRequest
     public ChatRequest AddAssistantMessage(object content)
     {
         Messages.Add(new AssistantChatMessage(JsonSerializer.Serialize(content, _jsonSerializerOptions)));
+        return this;
+    }
+
+    public ChatRequest AddAssistantMessage(IEnumerable<ChatMessageContentPart> parts)
+    {
+        Messages.Add(new AssistantChatMessage(parts));
+        return this;
+    }
+
+    public ChatRequest AddAssistantMessage(params ChatMessageContentPart[] parts)
+    {
+        Messages.Add(new AssistantChatMessage(parts));
         return this;
     }
 
@@ -64,10 +88,10 @@ public class ChatRequest
 
     public ChatRequest SetResponseType(string name, BinaryData data)
     {
-        // Options.ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(name, data, jsonSchemaIsStrict: true);
-        var index = Messages.FindLastIndex(e => e is SystemChatMessage) + 1;
-        Messages.Insert(index,
-            new SystemChatMessage($"Final response must be presented as a json schema {name}. Description in the OpenAPI format:\n\n```json\n{data}\n```"));
+        Options.ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(name, data, jsonSchemaIsStrict: true);
+        // var index = Messages.FindLastIndex(e => e is SystemChatMessage) + 1;
+        // Messages.Insert(index,
+            // new SystemChatMessage($"Final response must be presented as a json schema {name}. Description in the OpenAPI format:\n\n```json\n{data}\n```"));
         return this;
     }
 }
