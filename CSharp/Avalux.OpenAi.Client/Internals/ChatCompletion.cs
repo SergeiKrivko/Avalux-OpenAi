@@ -2,7 +2,10 @@
 
 namespace Avalux.OpenAi.Client.Internals;
 
-internal class ChatCompletion(OpenAI.Chat.ChatCompletion completion, ChatCompletionUsage? usage = null) : IChatCompletion
+internal class ChatCompletion(
+    OpenAI.Chat.ChatCompletion completion,
+    JsonSerializerOptions jsonSerializerOptions,
+    ChatCompletionUsage? usage = null) : IChatCompletion
 {
     public string Content => completion.Content[0].Text;
 
@@ -49,7 +52,7 @@ internal class ChatCompletion(OpenAI.Chat.ChatCompletion completion, ChatComplet
             content = content.Substring(0, content.IndexOf("```", StringComparison.InvariantCulture));
         }
 
-        return JsonSerializer.Deserialize<T>(content) ?? throw new Exception("Invalid LLM response");
+        return JsonSerializer.Deserialize<T>(content, jsonSerializerOptions) ?? throw new Exception("Invalid LLM response");
     }
 
     public object ReadAsJson(Type type)
@@ -62,6 +65,6 @@ internal class ChatCompletion(OpenAI.Chat.ChatCompletion completion, ChatComplet
             content = content.Substring(0, content.IndexOf("```", StringComparison.InvariantCulture));
         }
 
-        return JsonSerializer.Deserialize(content, type) ?? throw new Exception("Invalid LLM response");
+        return JsonSerializer.Deserialize(content, type, jsonSerializerOptions) ?? throw new Exception("Invalid LLM response");
     }
 }

@@ -1,4 +1,7 @@
 ﻿using System.ClientModel;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Unicode;
 using Avalux.OpenAi.Client.Internals;
 using Avalux.OpenAi.Client.Models;
 using OpenAI;
@@ -14,6 +17,12 @@ public class OpenAiClient<TContext>(OpenAiClientOptions options) : IOpenAiClient
         {
             Endpoint = options.ApiEndpoint
         });
+
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+        PropertyNameCaseInsensitive = false,
+    };
 
     private readonly ChatCompletionUsage _usage = new();
     public IChatCompletionUsage Usage => _usage;
@@ -44,7 +53,7 @@ public class OpenAiClient<TContext>(OpenAiClientOptions options) : IOpenAiClient
         }
 
         _usage.Add(usage);
-        return new ChatCompletion(response.Value, usage);
+        return new ChatCompletion(response.Value, _jsonSerializerOptions, usage);
     }
 
     public async Task<IChatCompletion> CompleteAsync(ChatRequest request, TContext context,
@@ -72,7 +81,7 @@ public class OpenAiClient<TContext>(OpenAiClientOptions options) : IOpenAiClient
         }
 
         _usage.Add(usage);
-        return new ChatCompletion(response.Value, usage);
+        return new ChatCompletion(response.Value, _jsonSerializerOptions, usage);
     }
 
     public void AddFunction<TIn, TOut>(string name, string? description, Func<TIn, Task<TOut>> func)
