@@ -21,7 +21,7 @@ public class OpenAiClient<TContext>(OpenAiClientOptions options) : IOpenAiClient
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
         Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
-        PropertyNameCaseInsensitive = false,
+        PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 
