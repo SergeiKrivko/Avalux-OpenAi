@@ -88,10 +88,10 @@ public class ChatRequest
 
     public ChatRequest SetResponseType(string name, BinaryData data)
     {
-        Options.ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(name, data, jsonSchemaIsStrict: true);
-        // var index = Messages.FindLastIndex(e => e is SystemChatMessage) + 1;
-        // Messages.Insert(index,
-            // new SystemChatMessage($"Final response must be presented as a json schema {name}. Description in the OpenAPI format:\n\n```json\n{data}\n```"));
+        // Options.ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(name, data, jsonSchemaIsStrict: true);
+        var index = Messages.FindLastIndex(e => e is SystemChatMessage) + 1;
+        Messages.Insert(index,
+            new SystemChatMessage($"Final response must be presented as a json schema {name}. Description in the OpenAPI format:\n\n```json\n{data}\n```"));
         return this;
     }
 }

@@ -49,6 +49,15 @@ internal static class TypeParser
                 };
         }
 
+        if (type.IsArray)
+        {
+            return new TypeSchema
+            {
+                Type = "array",
+                ItemsType = type.GetElementType()?.ToSchema(),
+                Description = description,
+            };
+        }
         if (type.IsAssignableTo(typeof(IEnumerable)))
         {
             return new TypeSchema
