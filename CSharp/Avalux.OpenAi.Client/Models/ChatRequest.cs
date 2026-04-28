@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.Unicode;
 using OpenAI.Chat;
 using Avalux.OpenAi.Client.Internals;
@@ -16,6 +17,7 @@ public class ChatRequest
     {
         Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
         PropertyNameCaseInsensitive = false,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
     public ChatRequest AddSystemPrompt(string content)
