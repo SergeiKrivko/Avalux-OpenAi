@@ -21,14 +21,14 @@ internal static class TypeParser
                 EnumOptions = type.GetEnumNames(),
                 Description = description,
             };
+        if (type.IsAssignableTo(typeof(string)))
+            return new TypeSchema
+            {
+                Type = "string",
+                Description = description,
+            };
         if (type.IsPrimitive)
         {
-            if (type.IsAssignableTo(typeof(string)))
-                return new TypeSchema
-                {
-                    Type = "string",
-                    Description = description,
-                };
             if (type.IsAssignableTo(typeof(int)))
                 return new TypeSchema
                 {
